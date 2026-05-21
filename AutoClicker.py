@@ -13,17 +13,19 @@ ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(MyAppId)
 
 if hasattr(sys, '_MEIPASS'):
     icon_path = os.path.join(sys._MEIPASS, 'icon.ico')
-else: icon_path = 'icon.png'
+else: icon_path = 'icon.ico'
 
 AmountOfClicks = 10
 IsClickerActive=False
-IsInfiniteMode = True
 MouseButtonToClick = Button.left  
 
 root = tk.Tk()
 root.title("AutoClicker")
 root.geometry("500x400")
 
+#-------BEGGINING OF GUI SETUP--------
+
+# -INTERVAL-
 timeInput_frame = tk.LabelFrame(root, text="Click Interval",bd=2)
 timeInput_frame.pack(fill='x', padx=10, pady=10, side='top')
 
@@ -51,10 +53,36 @@ miliseconds_InputFrame = tk.Entry(timeInput_frame, width=8)
 miliseconds_InputFrame.insert(0, "100")
 miliseconds_InputFrame.grid(pady=5, padx=5, row=0, column=7)
 
+# -MODE SELECTION-
+Mode = tk.IntVar()
+Mode.set(1)
+
+modeSelection_frame = tk.LabelFrame(root, text="Mode Selection", bd=2)
+modeSelection_frame.pack(fill='x', padx=10, pady=10, side='top')
+
+infiniteMode_toggle = tk.Radiobutton(modeSelection_frame, variable=Mode, value=1)
+infiniteMode_toggle.grid(row=0, column=0,padx=(10,0))
+infiniteMode_label=tk.Label(modeSelection_frame, text="Repeat until stoped")
+infiniteMode_label.grid(row=0, column=1)
+
+amountOfClicksMode_toggle = tk.Radiobutton(modeSelection_frame, variable=Mode, value=2)
+amountOfClicksMode_toggle.grid(row=0, column=2, padx=(20,0))
+amountOfClicksMode_labelPart1=tk.Label(modeSelection_frame, text="Repeat")
+amountOfClicksMode_labelPart1.grid(row=0, column=3)
+amountOfClicksMode_InputFrame=tk.Entry(modeSelection_frame, width=10)
+amountOfClicksMode_InputFrame.insert(0,"10")
+amountOfClicksMode_InputFrame.grid(row=0, column=4, padx=5)
+amountOfClicksMode_labelPart2=tk.Label(modeSelection_frame, text="times")
+amountOfClicksMode_labelPart2.grid(row=0, column=5)
+
+#------END OF GUI SETUP------
+
 Icon = ImageTk.PhotoImage(Image.open(icon_path))
 root.iconphoto(False, Icon)
+
 Mouse = Controller()
         
+# -MAIN CLICKER FUNCTION-
 def Clicker():
     global IsClickerActive
     
@@ -77,19 +105,27 @@ def Clicker():
             time.sleep(0.1)
             continue    
             
-        if IsInfiniteMode: 
+        if Mode.get()==1: 
             Mouse.click(MouseButtonToClick)
             time.sleep(delay)
         else:
-            for i in range(AmountOfClicks):
+            try:
+                amountOfClicks = int(amountOfClicksMode_InputFrame.get() or 1)
+            except:
+                amountOfClicks = 10
+
+            for i in range(amountOfClicks):
+                if not IsClickerActive: break
                 Mouse.click(MouseButtonToClick)
                 time.sleep(delay)
             IsClickerActive=False
 
+#IF THE PRESET BUTTON FOR INFINITE MODE IS PRESSED CHANGE TO CLICKER IS ACTIVE
 def on_click(key):
     global IsClickerActive
     if hasattr(key,'char') and key.char == 'f': IsClickerActive = not IsClickerActive
 
+#REMOVES THE CURSOR FROM ENTRY FIELD IF YOU CLICK SOMEWHERE ELSE
 def remove_focus(event):
     if event.widget.winfo_class() == "Entry": return
     root.focus_set()
