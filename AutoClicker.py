@@ -5,8 +5,8 @@ import threading
 
 delay = 0.5
 AmountOfClicks = 10
-IsClickerActive=True
-IsInfiniteMode = False
+IsClickerActive=False
+IsInfiniteMode = True
 MouseButtonToClick = Button.left    
 
 Mouse = Controller()
@@ -28,7 +28,14 @@ def Clicker():
                 time.sleep(delay)
             IsClickerActive=False
 
+def on_click(key):
+    global IsClickerActive
+    if hasattr(key,'char') and key.char == 'f': IsClickerActive = not IsClickerActive
+
 thread = threading.Thread(target=Clicker)
 thread.start()
 
-time.sleep(delay*AmountOfClicks+1)
+with Listener(on_press = on_click) as listener:
+    listener.join()   
+
+#time.sleep(delay*AmountOfClicks+1)
