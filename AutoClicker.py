@@ -66,10 +66,19 @@ def capture_key(event):
 
 # -------------------------
 
+# -FUNCTION TO UPDATE WHICH MOUSE BUTTON TO CLICK-
 def update_mouse_button(event):
     global MouseButtonToClick
-
     MouseButtonToClick=Button_mapping[selected_option.get()]
+
+# -FUNCTIONS FOR START AND STOP BUTTONS-
+def changeClickerState_toActive():
+    global IsClickerActive
+    IsClickerActive = not IsClickerActive if IsClickerActive == False else IsClickerActive
+
+def changeClickerState_toUnActive():
+    global IsClickerActive
+    IsClickerActive = not IsClickerActive if IsClickerActive else IsClickerActive
 
 #-------BEGGINING OF GUI SETUP--------
 
@@ -123,25 +132,28 @@ amountOfClicksMode_InputFrame.grid(row=0, column=4, padx=5)
 amountOfClicksMode_labelPart2=tk.Label(modeSelection_frame, text="times")
 amountOfClicksMode_labelPart2.grid(row=0, column=5)
 
-#ROW FOR KEY BINDING AND MOUSE BUTTON SELECTION
-Row_frame = tk.Frame(root)
-Row_frame.pack(side="top",fill='x')
+# -CONTAINER FOR KEY BINDING,MOUSE BUTTON SELECTION AND START AND END BUTTONS-
+Container_frame = tk.Frame(root)
+Container_frame.pack(side="top",fill='x')
+Container_frame.columnconfigure(0, weight=1)
+Container_frame.columnconfigure(1, weight=1)
+Container_frame.rowconfigure(0,weight=1)
 
-# -KEY BINDING-
-keyBinding_frame = tk.LabelFrame(Row_frame, text="Key Binding", bd=2 )
-keyBinding_frame.pack(padx=(10,0), pady=10, side="left", expand=True, fill='x')
+# -KEY BINDING- 
+keyBinding_frame = tk.LabelFrame(Container_frame, text="Key Binding", bd=2 )  
+keyBinding_frame.grid(padx=(10,0), pady=10, row=0, column=0, sticky='nswe')
 
-keyBinding_label = tk.Label(keyBinding_frame, text="Start/End Hotkey:")
+keyBinding_label = tk.Label(keyBinding_frame, text="Start/Stop Hotkey:")
 keyBinding_label.grid(row=0, column=0)
 keyBinding_button = tk.Button(keyBinding_frame, text="F", command=start_listening,width=10)
 keyBinding_button.grid(row=0,column=1,pady=(0,5))
 
 # -MOUSE BUTTON SELECTION-
 selected_option=tk.StringVar()
-options = ["Left", "Right", "Middle"]
+options = ["Left", "Right", "Middle"]   
 
-mouseButtonSelection_frame = tk.LabelFrame(Row_frame, text="Mouse button selection", bd=2)
-mouseButtonSelection_frame.pack(padx=10, pady=10, side="left", expand=True, fill='x')
+mouseButtonSelection_frame = tk.LabelFrame(Container_frame, text="Mouse button selection", bd=2)
+mouseButtonSelection_frame.grid(padx=10, pady=10, row=0, column=1, sticky='nswe')
 
 mouseButtonSelection_label = tk.Label(mouseButtonSelection_frame, text="Mouse button to click:")
 mouseButtonSelection_label.grid(row=0, column=0)
@@ -150,6 +162,12 @@ mouseButtonSelection_dropdown.current(0)
 mouseButtonSelection_dropdown.grid(row=0, column=1, pady=(0,5))
 mouseButtonSelection_dropdown.bind("<<ComboboxSelected>>", update_mouse_button)
 
+# -START AND STOP BUTTONS-  
+startButton = tk.Button(Container_frame, text="Start", font=12, command=changeClickerState_toActive, height=2)
+startButton.grid(row=1, column=0, padx=(10,0),sticky='we')
+
+stopButton = tk.Button(Container_frame, text="Stop", font=12, command=changeClickerState_toUnActive, height=2)
+stopButton.grid(row=1, column=1, padx=10, sticky='we')
 
 #------END OF GUI SETUP------
 
