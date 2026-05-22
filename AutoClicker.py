@@ -3,6 +3,7 @@ from pynput.mouse import Button, Controller
 import time
 import threading
 import tkinter as tk
+from tkinter import ttk
 from PIL import Image, ImageTk
 import ctypes
 import sys
@@ -20,6 +21,12 @@ IsClickerActive=False
 MouseButtonToClick = Button.left  
 Hotkey='f'
 
+Button_mapping={
+    "Left": Button.left,
+    "Right": Button.right,
+    "Middle": Button.middle
+}
+
 key_translation={
     "escape": "esc",
     "return": "enter",
@@ -33,6 +40,7 @@ Banned_Keys = {"control_l", "shift_l", "alt_r", "backspace", "escape", " ", "ret
 root = tk.Tk()
 root.title("AutoClicker")
 root.geometry("500x400")
+root.resizable(width=False, height=False)
 
 # -KEY BINDING FUNCTIONS-
 
@@ -45,7 +53,7 @@ def capture_key(event):
 
     key_keysym = event.keysym.lower()
     if key_keysym in Banned_Keys:  
-        root.unbind("<Key>")
+        root.unbind("<Key>")    
         keyBinding_button.config(text=f"{Hotkey.capitalize()}", state='normal')
         return
 
@@ -57,6 +65,11 @@ def capture_key(event):
     keyBinding_button.config(text=f"{Hotkey.capitalize()}", state='normal')
 
 # -------------------------
+
+def update_mouse_button(event):
+    global MouseButtonToClick
+
+    MouseButtonToClick=Button_mapping[selected_option.get()]
 
 #-------BEGGINING OF GUI SETUP--------
 
@@ -124,11 +137,18 @@ keyBinding_button = tk.Button(keyBinding_frame, text="F", command=start_listenin
 keyBinding_button.grid(row=0,column=1,pady=(0,5))
 
 # -MOUSE BUTTON SELECTION-
-mouseButtonSelection_frame = tk.LabelFrame(Row_frame, text="Mouse button selection", bd=2 )
+selected_option=tk.StringVar()
+options = ["Left", "Right", "Middle"]
+
+mouseButtonSelection_frame = tk.LabelFrame(Row_frame, text="Mouse button selection", bd=2)
 mouseButtonSelection_frame.pack(padx=10, pady=10, side="left", expand=True, fill='x')
 
 mouseButtonSelection_label = tk.Label(mouseButtonSelection_frame, text="Mouse button to click:")
 mouseButtonSelection_label.grid(row=0, column=0)
+mouseButtonSelection_dropdown = ttk.Combobox(mouseButtonSelection_frame, state="readonly", values=options, textvariable=selected_option, width=10)
+mouseButtonSelection_dropdown.current(0)
+mouseButtonSelection_dropdown.grid(row=0, column=1, pady=(0,5))
+mouseButtonSelection_dropdown.bind("<<ComboboxSelected>>", update_mouse_button)
 
 
 #------END OF GUI SETUP------
