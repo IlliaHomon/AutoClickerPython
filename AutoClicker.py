@@ -18,10 +18,45 @@ else: icon_path = 'icon.ico'
 AmountOfClicks = 10
 IsClickerActive=False
 MouseButtonToClick = Button.left  
+Hotkey='f'
+
+key_translation={
+    "escape": "esc",
+    "return": "enter",
+    "space": "space",
+    "tab": "tab",
+    "backspace": "backspace"
+}
+
+Banned_Keys = {"control_l", "shift_l", "alt_r", "backspace", "escape", " ", "return", "tab"}
 
 root = tk.Tk()
 root.title("AutoClicker")
 root.geometry("500x400")
+
+# -KEY BINDING FUNCTIONS-
+
+def start_listening():
+    keyBinding_button.config(text="Press any key...", state='disabled')
+    root.bind("<Key>", capture_key)
+
+def capture_key(event):
+    global Hotkey
+
+    key_keysym = event.keysym.lower()
+    if key_keysym in Banned_Keys:  
+        root.unbind("<Key>")
+        keyBinding_button.config(text=f"{Hotkey.capitalize()}", state='normal')
+        return
+
+    new_key = event.char if event.char else event.keysym
+    new_key=new_key.lower()
+    translation = key_translation.get(new_key,new_key)
+    if translation: Hotkey = translation
+    root.unbind("<Key>")
+    keyBinding_button.config(text=f"{Hotkey.capitalize()}", state='normal')
+
+# -------------------------
 
 #-------BEGGINING OF GUI SETUP--------
 
@@ -75,6 +110,27 @@ amountOfClicksMode_InputFrame.grid(row=0, column=4, padx=5)
 amountOfClicksMode_labelPart2=tk.Label(modeSelection_frame, text="times")
 amountOfClicksMode_labelPart2.grid(row=0, column=5)
 
+#ROW FOR KEY BINDING AND MOUSE BUTTON SELECTION
+Row_frame = tk.Frame(root)
+Row_frame.pack(side="top",fill='x')
+
+# -KEY BINDING-
+keyBinding_frame = tk.LabelFrame(Row_frame, text="Key Binding", bd=2 )
+keyBinding_frame.pack(padx=(10,0), pady=10, side="left", expand=True, fill='x')
+
+keyBinding_label = tk.Label(keyBinding_frame, text="Start/End Hotkey:")
+keyBinding_label.grid(row=0, column=0)
+keyBinding_button = tk.Button(keyBinding_frame, text="F", command=start_listening,width=10)
+keyBinding_button.grid(row=0,column=1,pady=(0,5))
+
+# -MOUSE BUTTON SELECTION-
+mouseButtonSelection_frame = tk.LabelFrame(Row_frame, text="Mouse button selection", bd=2 )
+mouseButtonSelection_frame.pack(padx=10, pady=10, side="left", expand=True, fill='x')
+
+mouseButtonSelection_label = tk.Label(mouseButtonSelection_frame, text="Mouse button to click:")
+mouseButtonSelection_label.grid(row=0, column=0)
+
+
 #------END OF GUI SETUP------
 
 Icon = ImageTk.PhotoImage(Image.open(icon_path))
@@ -120,10 +176,14 @@ def Clicker():
                 time.sleep(delay)
             IsClickerActive=False
 
+
+
+
+
 #IF THE PRESET BUTTON FOR INFINITE MODE IS PRESSED CHANGE TO CLICKER IS ACTIVE
 def on_click(key):
     global IsClickerActive
-    if hasattr(key,'char') and key.char == 'f': IsClickerActive = not IsClickerActive
+    if (hasattr(key,'char') and key.char is not None and key.char==Hotkey) or (getattr(key,'name','') and key.name.lower()==Hotkey): IsClickerActive = not IsClickerActive
 
 #REMOVES THE CURSOR FROM ENTRY FIELD IF YOU CLICK SOMEWHERE ELSE
 def remove_focus(event):
