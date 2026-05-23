@@ -8,6 +8,7 @@ from PIL import Image, ImageTk
 import ctypes
 import sys
 import os
+import json
 
 MyAppId = 'IlliaHomon.AutoClickerPython.1.2'
 ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(MyAppId)
@@ -20,6 +21,7 @@ AmountOfClicks = 10
 IsClickerActive=False
 MouseButtonToClick = Button.left  
 Hotkey="f8"
+
 
 Button_mapping={
     "Left": Button.left,
@@ -42,6 +44,57 @@ root.title("AutoClicker")
 root.geometry("500x400")
 root.resizable(width=False, height=False)
 
+selected_option = tk.StringVar()
+
+# -READING FROM JSON-
+def load_settings():
+    global Hotkey, AmountOfClicks, MouseButtonToClick,isStayOnTop, selected_option
+    if os.path.exists("settings.json"):
+        try:
+            with open("settings.json", "r") as file:
+                settings_data = json.load(file)
+
+                Hotkey=settings_data.get("Hotkey")
+                keyBinding_button.config(text=f"{Hotkey.capitalize()}")
+
+                AmountOfClicks=settings_data.get("amount_of_clicks")
+
+                button_str = settings_data.get("mouse_button_to_click", "Left")
+                selected_option.set(button_str)
+                MouseButtonToClick=Button_mapping[selected_option.get()]
+
+                hours_InputFrame.delete(0, tk.END)
+                hours_InputFrame.insert(0, settings_data.get("hours", 0))
+                minutes_InputFrame.delete(0, tk.END)
+                minutes_InputFrame.insert(0, settings_data.get("minutes", 0))
+                seconds_InputFrame.delete(0, tk.END)
+                seconds_InputFrame.insert(0, settings_data.get("seconds", 0))
+                miliseconds_InputFrame.delete(0, tk.END)
+                miliseconds_InputFrame.insert(0, settings_data.get("miliseconds", 0))
+
+                isStayOnTop.set(settings_data.get("stay_on_top"))
+        except(json.JSONDecodeError, KeyError): 
+            print("Settings file corrupted or missing keys. Using default configurations.")
+
+        
+
+
+# -WRITING TO JSON-
+def save_settings():
+    settings_data = {
+        "Hotkey": Hotkey,
+        "amount_of_clicks": AmountOfClicks,
+        "mouse_button_to_click": selected_option.get(),
+        "hours": int(hours_InputFrame.get() or 0),
+        "minutes": int(minutes_InputFrame.get() or 0),
+        "seconds": int(seconds_InputFrame.get() or 0),
+        "miliseconds": int(miliseconds_InputFrame.get() or 0),
+        "stay_on_top": isStayOnTop.get()
+    }
+
+    with open("settings.json", "w") as file:
+        json.dump(settings_data, file, indent=4)
+
 # -KEY BINDING FUNCTIONS-
 
 def start_listening():
@@ -63,6 +116,7 @@ def capture_key(event):
     if translation: Hotkey = translation
     root.unbind("<Key>")
     keyBinding_button.config(text=f"{Hotkey.capitalize()}", state='normal')
+    save_settings()
 
 # -------------------------
 
@@ -70,6 +124,7 @@ def capture_key(event):
 def update_mouse_button(event):
     global MouseButtonToClick
     MouseButtonToClick=Button_mapping[selected_option.get()]
+    save_settings()
 
 # -FUNCTIONS FOR START AND STOP BUTTONS-
 def changeClickerState_toActive():
@@ -84,6 +139,7 @@ def changeClickerState_toUnActive():
 def stayOnTop():
     if isStayOnTop.get(): root.attributes("-topmost", True)
     else: root.attributes("-topmost", False)
+    save_settings()
 
 #-------BEGGINING OF GUI SETUP--------
 
@@ -96,24 +152,28 @@ hours_label.grid(row=0, column=0, padx=(10,0))
 hours_InputFrame = tk.Entry(timeInput_frame, width=8)
 hours_InputFrame.insert(0, "0")
 hours_InputFrame.grid(pady=5, padx=5, row=0, column=1)
+hours_InputFrame.bind("<FocusOut>", lambda event: save_settings())
 
 minutes_label = tk.Label(timeInput_frame, text="Mins:", font=("Arial", 9))
 minutes_label.grid(row=0, column=2)
 minutes_InputFrame = tk.Entry(timeInput_frame, width=8)
 minutes_InputFrame.insert(0, "0")
 minutes_InputFrame.grid(pady=5, padx=5, row=0, column=3)
+minutes_InputFrame.bind("<FocusOut>", lambda event: save_settings())
 
 seconds_label = tk.Label(timeInput_frame, text="Secs:", font=("Arial", 9))
 seconds_label.grid(row=0, column=4)
 seconds_InputFrame = tk.Entry(timeInput_frame, width=8)
 seconds_InputFrame.insert(0, "0")
 seconds_InputFrame.grid(pady=5, padx=5, row=0, column=5)
+seconds_InputFrame.bind("<FocusOut>", lambda event: save_settings())
 
 miliseconds_label = tk.Label(timeInput_frame, text="Milisecs:", font=("Arial", 9))
 miliseconds_label.grid(row=0, column=6)
 miliseconds_InputFrame = tk.Entry(timeInput_frame, width=8)
 miliseconds_InputFrame.insert(0, "100")
 miliseconds_InputFrame.grid(pady=5, padx=5, row=0, column=7)
+miliseconds_InputFrame.bind("<FocusOut>", lambda event: save_settings())
 
 # ------SETTINGS-------
 settings_frame = tk.LabelFrame(root, text="Settings", bd=2)
@@ -182,7 +242,7 @@ mouseButtonSelection_frame.grid(padx=10, pady=(10,20), row=0, column=1, sticky='
 mouseButtonSelection_label = tk.Label(mouseButtonSelection_frame, text="Mouse button to click:")
 mouseButtonSelection_label.grid(row=0, column=0)
 mouseButtonSelection_dropdown = ttk.Combobox(mouseButtonSelection_frame, state="readonly", values=options, textvariable=selected_option, width=10)
-mouseButtonSelection_dropdown.current(0)
+if not selected_option.get(): mouseButtonSelection_dropdown.current(0)
 mouseButtonSelection_dropdown.grid(row=0, column=1, pady=(0,5))
 mouseButtonSelection_dropdown.bind("<<ComboboxSelected>>", update_mouse_button)
 
@@ -207,12 +267,12 @@ def Clicker():
     while True:
 
         try:
-            h = float(hours_InputFrame.get() or 0)
-            m = float(minutes_InputFrame.get() or 0)
-            s = float(seconds_InputFrame.get() or 0)
-            ms = float(miliseconds_InputFrame.get() or 0)
+            hours = float(hours_InputFrame.get() or 0)
+            minutes = float(minutes_InputFrame.get() or 0)
+            seconds = float(seconds_InputFrame.get() or 0)
+            miliseconds = float(miliseconds_InputFrame.get() or 0)
             
-            delay = (h * 3600) + (m * 60) + s + (ms / 1000)
+            delay = (hours * 3600) + (minutes * 60) + seconds + (miliseconds / 1000)
             
             if delay <= 0: 
                 delay = 0.1
@@ -257,6 +317,7 @@ KeyboardListener.start()
 
 root.bind("<Button-1>", remove_focus)
 
+load_settings()
 root.mainloop()
 
 #time.sleep(delay*AmountOfClicks+1)
