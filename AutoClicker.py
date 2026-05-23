@@ -19,7 +19,7 @@ else: icon_path = 'icon.ico'
 AmountOfClicks = 10
 IsClickerActive=False
 MouseButtonToClick = Button.left  
-Hotkey='f'
+Hotkey="f8"
 
 Button_mapping={
     "Left": Button.left,
@@ -80,6 +80,11 @@ def changeClickerState_toUnActive():
     global IsClickerActive
     IsClickerActive = not IsClickerActive if IsClickerActive else IsClickerActive
 
+# -FUNCTIONS FOR STAYING ON TOP-
+def stayOnTop():
+    if isStayOnTop.get(): root.attributes("-topmost", True)
+    else: root.attributes("-topmost", False)
+
 #-------BEGGINING OF GUI SETUP--------
 
 # -INTERVAL-
@@ -110,29 +115,48 @@ miliseconds_InputFrame = tk.Entry(timeInput_frame, width=8)
 miliseconds_InputFrame.insert(0, "100")
 miliseconds_InputFrame.grid(pady=5, padx=5, row=0, column=7)
 
+# ------SETTINGS-------
+settings_frame = tk.LabelFrame(root, text="Settings", bd=2)
+settings_frame.pack(fill='x', padx=10, pady=10, side='top')
+settings_frame.columnconfigure(0,weight=1)
+settings_frame.columnconfigure(1,weight=1)
+
 # -MODE SELECTION-
 Mode = tk.IntVar()
 Mode.set(1)
 
-modeSelection_frame = tk.LabelFrame(root, text="Mode Selection", bd=2)
-modeSelection_frame.pack(fill='x', padx=10, pady=10, side='top')
+modeSelection_frame = tk.LabelFrame(settings_frame, text="Mode Selection", bd=2)
+modeSelection_frame.grid(row=0, column=0, sticky='we', padx=10, pady=10)
 
 infiniteMode_toggle = tk.Radiobutton(modeSelection_frame, variable=Mode, value=1)
-infiniteMode_toggle.grid(row=0, column=0,padx=(10,0))
+infiniteMode_toggle.grid(row=0, column=0,pady=10)
 infiniteMode_label=tk.Label(modeSelection_frame, text="Repeat until stoped")
-infiniteMode_label.grid(row=0, column=1)
+infiniteMode_label.grid(row=0, column=1, columnspan=3, sticky='w')
 
 amountOfClicksMode_toggle = tk.Radiobutton(modeSelection_frame, variable=Mode, value=2)
-amountOfClicksMode_toggle.grid(row=0, column=2, padx=(20,0))
+amountOfClicksMode_toggle.grid(row=1, column=0, pady=10)
 amountOfClicksMode_labelPart1=tk.Label(modeSelection_frame, text="Repeat")
-amountOfClicksMode_labelPart1.grid(row=0, column=3)
+amountOfClicksMode_labelPart1.grid(row=1, column=1)
 amountOfClicksMode_InputFrame=tk.Entry(modeSelection_frame, width=10)
 amountOfClicksMode_InputFrame.insert(0,"10")
-amountOfClicksMode_InputFrame.grid(row=0, column=4, padx=5)
+amountOfClicksMode_InputFrame.grid(row=1, column=2, padx=5)
 amountOfClicksMode_labelPart2=tk.Label(modeSelection_frame, text="times")
-amountOfClicksMode_labelPart2.grid(row=0, column=5)
+amountOfClicksMode_labelPart2.grid(row=1, column=3)
 
-# -CONTAINER FOR KEY BINDING,MOUSE BUTTON SELECTION AND START AND END BUTTONS-
+# -OTHER SETTINGS-
+isStayOnTop = tk.BooleanVar()
+
+otherSettings_frame = tk.LabelFrame(settings_frame, text="Other Settings", bd=2)
+otherSettings_frame.grid(row=0, column=1, sticky='nswe', padx=(0,10), pady=10)
+
+stayOnTop_checkButton = tk.Checkbutton(otherSettings_frame, onvalue=True, offvalue=False, variable=isStayOnTop, command=stayOnTop)
+stayOnTop_checkButton.grid(row=0, column=0)
+stayOnTop_label = tk.Label(otherSettings_frame, text="Stay on top")
+stayOnTop_label.grid(row=0, column=1)
+
+# -----------------------
+
+# -CONTAINER FOR KEY BINDING,MOUSE BUTTON SELECTION AND START/STOP BUTTONS-
 Container_frame = tk.Frame(root)
 Container_frame.pack(side="top",fill='x')
 Container_frame.columnconfigure(0, weight=1)
@@ -141,11 +165,11 @@ Container_frame.rowconfigure(0,weight=1)
 
 # -KEY BINDING- 
 keyBinding_frame = tk.LabelFrame(Container_frame, text="Key Binding", bd=2 )  
-keyBinding_frame.grid(padx=(10,0), pady=10, row=0, column=0, sticky='nswe')
+keyBinding_frame.grid(padx=(10,0), pady=(10,20), row=0, column=0, sticky='nswe')
 
 keyBinding_label = tk.Label(keyBinding_frame, text="Start/Stop Hotkey:")
 keyBinding_label.grid(row=0, column=0)
-keyBinding_button = tk.Button(keyBinding_frame, text="F", command=start_listening,width=10)
+keyBinding_button = tk.Button(keyBinding_frame, text="F8", command=start_listening,width=10)
 keyBinding_button.grid(row=0,column=1,pady=(0,5))
 
 # -MOUSE BUTTON SELECTION-
@@ -153,7 +177,7 @@ selected_option=tk.StringVar()
 options = ["Left", "Right", "Middle"]   
 
 mouseButtonSelection_frame = tk.LabelFrame(Container_frame, text="Mouse button selection", bd=2)
-mouseButtonSelection_frame.grid(padx=10, pady=10, row=0, column=1, sticky='nswe')
+mouseButtonSelection_frame.grid(padx=10, pady=(10,20), row=0, column=1, sticky='nswe')
 
 mouseButtonSelection_label = tk.Label(mouseButtonSelection_frame, text="Mouse button to click:")
 mouseButtonSelection_label.grid(row=0, column=0)
@@ -214,10 +238,6 @@ def Clicker():
                 time.sleep(delay)
             IsClickerActive=False
 
-
-
-
-
 #IF THE PRESET BUTTON FOR INFINITE MODE IS PRESSED CHANGE TO CLICKER IS ACTIVE
 def on_click(key):
     global IsClickerActive
@@ -227,8 +247,6 @@ def on_click(key):
 def remove_focus(event):
     if event.widget.winfo_class() == "Entry": return
     root.focus_set()
-
-
 
 thread = threading.Thread(target=Clicker, daemon=True)
 thread.start()
