@@ -23,6 +23,7 @@ IsClickerActive=False
 MouseButtonToClick = Button.left  
 StartHotkey="f8"
 addTargetHotkey="q"
+deleteTargetHotkey="e"
 targets = []
 
 Button_mapping={
@@ -43,7 +44,7 @@ Banned_Keys = {"control_l", "shift_l", "alt_r", "backspace", "escape", " ", "ret
 
 root = tk.Tk()
 root.title("AutoClicker")
-root.geometry("500x410")
+root.geometry("500x425")
 root.resizable(width=False, height=False)
 
 selected_option = tk.StringVar()
@@ -117,13 +118,14 @@ def start_listening(target):
 
     if target == "start":
         startKeyBinding_button.config(text="Press any key...")
-    else:
+    elif target=="add_target":
         addTargetKeyBindig_button.config(text="Press any key...")
+    else: deleteTargetKeyBindig_button.config(text="Press any key...")
 
     root.bind("<Key>", lambda event: capture_key(event, target))
 
 def capture_key(event, target):
-    global StartHotkey, addTargetHotkey
+    global StartHotkey, addTargetHotkey, deleteTargetHotkey
 
     key_keysym = event.keysym.lower()
 
@@ -132,6 +134,7 @@ def capture_key(event, target):
             root.unbind("<Key>")    
             startKeyBinding_button.config(text=f"{StartHotkey.capitalize()}", state='normal')
             addTargetKeyBindig_button.config(text=f"{addTargetHotkey.capitalize()}", state='normal')
+            deleteTargetKeyBindig_button.config(text=f"{deleteTargetHotkey.capitalize()}", state='normal')
             return
 
         new_key = event.char if event.char else event.keysym
@@ -141,12 +144,14 @@ def capture_key(event, target):
         root.unbind("<Key>")
         startKeyBinding_button.config(text=f"{StartHotkey.capitalize()}", state='normal')
         addTargetKeyBindig_button.config(text=f"{addTargetHotkey.capitalize()}", state='normal')
+        deleteTargetKeyBindig_button.config(text=f"{deleteTargetHotkey.capitalize()}", state='normal')
 
-    else:
+    elif target == "add_target":
         if key_keysym in Banned_Keys:  
             root.unbind("<Key>")    
             addTargetKeyBindig_button.config(text=f"{addTargetHotkey.capitalize()}", state='normal')
             startKeyBinding_button.config(text=f"{StartHotkey.capitalize()}", state='normal')
+            deleteTargetKeyBindig_button.config(text=f"{deleteTargetHotkey.capitalize()}", state='normal')
             return
 
         new_key = event.char if event.char else event.keysym
@@ -156,6 +161,24 @@ def capture_key(event, target):
         root.unbind("<Key>")
         addTargetKeyBindig_button.config(text=f"{addTargetHotkey.capitalize()}", state='normal')
         startKeyBinding_button.config(text=f"{StartHotkey.capitalize()}", state='normal')
+        deleteTargetKeyBindig_button.config(text=f"{deleteTargetHotkey.capitalize()}", state='normal')
+    
+    else:
+        if key_keysym in Banned_Keys:  
+            root.unbind("<Key>")    
+            addTargetKeyBindig_button.config(text=f"{addTargetHotkey.capitalize()}", state='normal')
+            startKeyBinding_button.config(text=f"{StartHotkey.capitalize()}", state='normal')
+            deleteTargetKeyBindig_button.config(text=f"{deleteTargetHotkey.capitalize()}", state='normal')
+            return
+        
+        new_key = event.char if event.char else event.keysym
+        new_key=new_key.lower()
+        translation = key_translation.get(new_key,new_key)
+        if translation: deleteTargetHotkey = translation
+        root.unbind("<Key>")
+        addTargetKeyBindig_button.config(text=f"{addTargetHotkey.capitalize()}", state='normal')
+        startKeyBinding_button.config(text=f"{StartHotkey.capitalize()}", state='normal')
+        deleteTargetKeyBindig_button.config(text=f"{deleteTargetHotkey.capitalize()}", state='normal')
 
     save_settings()
 
@@ -257,6 +280,8 @@ settings_frame.columnconfigure(1,weight=1)
 # -MODE SELECTION-
 Mode = tk.IntVar()
 Mode.set(1)
+selected_option=tk.StringVar()
+options = ["Left", "Right", "Middle"]  
 
 modeSelection_frame = tk.LabelFrame(settings_frame, text="Mode Selection", bd=2)
 modeSelection_frame.grid(row=0, column=0, sticky='we', padx=10, pady=(0,10))
@@ -267,14 +292,21 @@ infiniteMode_label=tk.Label(modeSelection_frame, text="Repeat until stoped")
 infiniteMode_label.grid(row=0, column=1, columnspan=3, sticky='w')
 
 amountOfClicksMode_toggle = tk.Radiobutton(modeSelection_frame, variable=Mode, value=2)
-amountOfClicksMode_toggle.grid(row=1, column=0, pady=10)
+amountOfClicksMode_toggle.grid(row=1, column=0, pady=5)
 amountOfClicksMode_labelPart1=tk.Label(modeSelection_frame, text="Repeat")
 amountOfClicksMode_labelPart1.grid(row=1, column=1)
 amountOfClicksMode_InputFrame=tk.Entry(modeSelection_frame, width=10)
 amountOfClicksMode_InputFrame.insert(0,"10")
 amountOfClicksMode_InputFrame.grid(row=1, column=2, padx=5)
 amountOfClicksMode_labelPart2=tk.Label(modeSelection_frame, text="times")
-amountOfClicksMode_labelPart2.grid(row=1, column=3)
+amountOfClicksMode_labelPart2.grid(row=1, column=3, sticky='w')
+
+mouseButtonSelection_label = tk.Label(modeSelection_frame, text="Mouse button to click:")
+mouseButtonSelection_label.grid(row=3, column=0, columnspan=3)
+mouseButtonSelection_dropdown = ttk.Combobox(modeSelection_frame, state="readonly", values=options, textvariable=selected_option, width=10)
+if not selected_option.get(): mouseButtonSelection_dropdown.current(0)
+mouseButtonSelection_dropdown.grid(row=3, column=3, pady=(0,5))
+mouseButtonSelection_dropdown.bind("<<ComboboxSelected>>", update_mouse_button)
 
 # -OTHER SETTINGS-
 isStayOnTop = tk.BooleanVar()
@@ -295,47 +327,36 @@ multiTarget_label.grid(row=1, column=1)
 
 # -----------------------
 
-# -CONTAINER FOR KEY BINDING,MOUSE BUTTON SELECTION AND START/STOP BUTTONS-
-Container_frame = tk.Frame(root)
-Container_frame.pack(side="top",fill='x')
-Container_frame.columnconfigure(0, weight=1)
-Container_frame.columnconfigure(1, weight=1)
-Container_frame.rowconfigure(0,weight=1)
-
 # -KEY BINDING- 
-keyBinding_frame = tk.LabelFrame(Container_frame, text="Key Binding", bd=2 )  
-keyBinding_frame.grid(padx=(10,0), pady=(0,10), row=0, column=0, sticky='nswe')
+keyBinding_frame = tk.LabelFrame(root, text="Key Binding", bd=2 )  
+keyBinding_frame.pack(padx=10, pady=(0,10), fill='x')
 
 startKeyBinding_label = tk.Label(keyBinding_frame, text="Start/Stop Hotkey:")
-startKeyBinding_label.grid(row=0, column=0)
+startKeyBinding_label.grid(row=0, column=0, padx=(10,0))
 startKeyBinding_button = tk.Button(keyBinding_frame, text="F8", command=lambda: start_listening("start"),width=10)
 startKeyBinding_button.grid(row=0,column=1,pady=(0,5))
 
 addTargetKeyBindig_label = tk.Label(keyBinding_frame, text="Add target Hotkey:")
-addTargetKeyBindig_label.grid(row=1, column=0)
-addTargetKeyBindig_button = tk.Button(keyBinding_frame, text="Q", command=lambda: start_listening("target"), width=10)
+addTargetKeyBindig_label.grid(row=1, column=0,pady=(0,10), padx=(10,0))
+addTargetKeyBindig_button = tk.Button(keyBinding_frame, text="Q", command=lambda: start_listening("add_target"), width=10)
 addTargetKeyBindig_button.grid(row=1, column=1, pady=(0,5))
 
-# -MOUSE BUTTON SELECTION-
-selected_option=tk.StringVar()
-options = ["Left", "Right", "Middle"]   
-
-mouseButtonSelection_frame = tk.LabelFrame(Container_frame, text="Mouse button selection", bd=2)
-mouseButtonSelection_frame.grid(padx=10, pady=(0,10), row=0, column=1, sticky='nswe')
-
-mouseButtonSelection_label = tk.Label(mouseButtonSelection_frame, text="Mouse button to click:")
-mouseButtonSelection_label.grid(row=0, column=0)
-mouseButtonSelection_dropdown = ttk.Combobox(mouseButtonSelection_frame, state="readonly", values=options, textvariable=selected_option, width=10)
-if not selected_option.get(): mouseButtonSelection_dropdown.current(0)
-mouseButtonSelection_dropdown.grid(row=0, column=1, pady=(0,5))
-mouseButtonSelection_dropdown.bind("<<ComboboxSelected>>", update_mouse_button)
+deleteTargetKeyBindig_label = tk.Label(keyBinding_frame, text="Delete target Hotkey:")
+deleteTargetKeyBindig_label.grid(row=0, column=2,pady=(0,10), padx=(20,0))
+deleteTargetKeyBindig_button = tk.Button(keyBinding_frame, text="E", command=lambda: start_listening("delete_target"), width=10)
+deleteTargetKeyBindig_button.grid(row=0, column=3, pady=(0,5))
 
 # -START AND STOP BUTTONS-  
-startButton = tk.Button(Container_frame, text="Start", font=12, command=changeClickerState_toActive, height=2)
-startButton.grid(row=1, column=0, padx=(10,0),sticky='we')
+StartStop_frame = tk.Frame(root)
+StartStop_frame.pack(fill='x')
+StartStop_frame.columnconfigure(0, weight=1)
+StartStop_frame.columnconfigure(1, weight=1)
 
-stopButton = tk.Button(Container_frame, text="Stop", font=12, command=changeClickerState_toUnActive, height=2)
-stopButton.grid(row=1, column=1, padx=10, sticky='we')
+startButton = tk.Button(StartStop_frame, text="Start", font=12, command=changeClickerState_toActive, height=2)
+startButton.grid(row=0, column=0, padx=(10,0),sticky='we')
+
+stopButton = tk.Button(StartStop_frame, text="Stop", font=12, command=changeClickerState_toUnActive, height=2)
+stopButton.grid(row=0, column=1, padx=10, sticky='we')
 
 #------END OF GUI SETUP------
 
@@ -440,10 +461,22 @@ def add_target(x, y, button, pressed):
     if button == Button.left and pressed: 
         targets.append([x,y])
         return False #This line is to destroy listener
+
+def delete_target(key):
+    if (
+        ((hasattr(key,'char') and key.char is not None and key.char==deleteTargetHotkey) or 
+        (getattr(key,'name','') and key.name.lower()==deleteTargetHotkey)) and 
+        isMultiTarget.get() and targets
+        ):
+            del targets[-1]
     
 KeyboardAddTargetListener = Listener(on_press = on_addTarget_click)
 KeyboardAddTargetListener.daemon=True
 KeyboardAddTargetListener.start()
+
+KeyboardDeleteTargetListener = Listener(on_press=delete_target)
+KeyboardDeleteTargetListener.daemon=True
+KeyboardDeleteTargetListener.start()
 
 #REMOVES THE CURSOR FROM ENTRY FIELD IF YOU CLICK SOMEWHERE ELSE
 def remove_focus(event):
