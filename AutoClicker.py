@@ -1,5 +1,6 @@
 from pynput.keyboard import Listener, Key
-from pynput.mouse import Button, Controller 
+from pynput.mouse import Button, Controller
+from pynput.mouse import Listener as MouseListener
 import time
 import threading
 import tkinter as tk
@@ -20,8 +21,9 @@ else: icon_path = 'icon.ico'
 AmountOfClicks = 10
 IsClickerActive=False
 MouseButtonToClick = Button.left  
-Hotkey="f8"
-
+StartHotkey="f8"
+addTargetHotkey="q"
+targets = []
 
 Button_mapping={
     "Left": Button.left,
@@ -48,14 +50,14 @@ selected_option = tk.StringVar()
 
 # -READING FROM JSON-
 def load_settings():
-    global Hotkey, AmountOfClicks, MouseButtonToClick,isStayOnTop, selected_option
+    global StartHotkey, AmountOfClicks, MouseButtonToClick,isStayOnTop, selected_option
     if os.path.exists("settings.json"):
         try:
             with open("settings.json", "r") as file:
                 settings_data = json.load(file)
 
-                Hotkey=settings_data.get("Hotkey")
-                keyBinding_button.config(text=f"{Hotkey.capitalize()}")
+                StartHotkey=settings_data.get("start_hotkey")
+                startKeyBinding_button.config(text=f"{StartHotkey.capitalize()}")
 
                 AmountOfClicks=settings_data.get("amount_of_clicks")
 
@@ -73,23 +75,22 @@ def load_settings():
                 miliseconds_InputFrame.insert(0, settings_data.get("miliseconds", 0))
 
                 isStayOnTop.set(settings_data.get("stay_on_top"))
+                isMultiTarget.set(settings_data.get("multi_target"))
         except(json.JSONDecodeError, KeyError): 
             print("Settings file corrupted or missing keys. Using default configurations.")
-
-        
-
 
 # -WRITING TO JSON-
 def save_settings():
     settings_data = {
-        "Hotkey": Hotkey,
+        "start_hotkey": StartHotkey,
         "amount_of_clicks": AmountOfClicks,
         "mouse_button_to_click": selected_option.get(),
         "hours": int(hours_InputFrame.get() or 0),
         "minutes": int(minutes_InputFrame.get() or 0),
         "seconds": int(seconds_InputFrame.get() or 0),
         "miliseconds": int(miliseconds_InputFrame.get() or 0),
-        "stay_on_top": isStayOnTop.get()
+        "stay_on_top": isStayOnTop.get(),
+        "multi_target": isMultiTarget.get()
     }
 
     with open("settings.json", "w") as file:
@@ -97,25 +98,52 @@ def save_settings():
 
 # -KEY BINDING FUNCTIONS-
 
-def start_listening():
-    keyBinding_button.config(text="Press any key...", state='disabled')
-    root.bind("<Key>", capture_key)
+def start_listening(target):
+    startKeyBinding_button.config(state='disabled')
+    addTargetKeyBindig_button.config(state='disabled')
 
-def capture_key(event):
-    global Hotkey
+    if target == "start":
+        startKeyBinding_button.config(text="Press any key...")
+    else:
+        addTargetKeyBindig_button.config(text="Press any key...")
+
+    root.bind("<Key>", lambda event: capture_key(event, target))
+
+def capture_key(event, target):
+    global StartHotkey, addTargetHotkey
 
     key_keysym = event.keysym.lower()
-    if key_keysym in Banned_Keys:  
-        root.unbind("<Key>")    
-        keyBinding_button.config(text=f"{Hotkey.capitalize()}", state='normal')
-        return
 
-    new_key = event.char if event.char else event.keysym
-    new_key=new_key.lower()
-    translation = key_translation.get(new_key,new_key)
-    if translation: Hotkey = translation
-    root.unbind("<Key>")
-    keyBinding_button.config(text=f"{Hotkey.capitalize()}", state='normal')
+    if target == "start":
+        if key_keysym in Banned_Keys:  
+            root.unbind("<Key>")    
+            startKeyBinding_button.config(text=f"{StartHotkey.capitalize()}", state='normal')
+            addTargetKeyBindig_button.config(text=f"{addTargetHotkey.capitalize()}", state='normal')
+            return
+
+        new_key = event.char if event.char else event.keysym
+        new_key=new_key.lower()
+        translation = key_translation.get(new_key,new_key)
+        if translation: StartHotkey = translation
+        root.unbind("<Key>")
+        startKeyBinding_button.config(text=f"{StartHotkey.capitalize()}", state='normal')
+        addTargetKeyBindig_button.config(text=f"{addTargetHotkey.capitalize()}", state='normal')
+
+    else:
+        if key_keysym in Banned_Keys:  
+            root.unbind("<Key>")    
+            addTargetKeyBindig_button.config(text=f"{addTargetHotkey.capitalize()}", state='normal')
+            startKeyBinding_button.config(text=f"{StartHotkey.capitalize()}", state='normal')
+            return
+
+        new_key = event.char if event.char else event.keysym
+        new_key=new_key.lower()
+        translation = key_translation.get(new_key,new_key)
+        if translation: addTargetHotkey = translation
+        root.unbind("<Key>")
+        addTargetKeyBindig_button.config(text=f"{addTargetHotkey.capitalize()}", state='normal')
+        startKeyBinding_button.config(text=f"{StartHotkey.capitalize()}", state='normal')
+
     save_settings()
 
 # -------------------------
@@ -205,6 +233,7 @@ amountOfClicksMode_labelPart2.grid(row=1, column=3)
 
 # -OTHER SETTINGS-
 isStayOnTop = tk.BooleanVar()
+isMultiTarget = tk.BooleanVar()
 
 otherSettings_frame = tk.LabelFrame(settings_frame, text="Other Settings", bd=2)
 otherSettings_frame.grid(row=0, column=1, sticky='nswe', padx=(0,10), pady=10)
@@ -213,6 +242,11 @@ stayOnTop_checkButton = tk.Checkbutton(otherSettings_frame, onvalue=True, offval
 stayOnTop_checkButton.grid(row=0, column=0)
 stayOnTop_label = tk.Label(otherSettings_frame, text="Stay on top")
 stayOnTop_label.grid(row=0, column=1)
+
+multiTarget_checkButton = tk.Checkbutton(otherSettings_frame, onvalue=True, offvalue= False, variable=isMultiTarget)
+multiTarget_checkButton.grid(row=1, column=0)
+multiTarget_label = tk.Label(otherSettings_frame, text="Multi target")
+multiTarget_label.grid(row=1, column=1)
 
 # -----------------------
 
@@ -227,10 +261,15 @@ Container_frame.rowconfigure(0,weight=1)
 keyBinding_frame = tk.LabelFrame(Container_frame, text="Key Binding", bd=2 )  
 keyBinding_frame.grid(padx=(10,0), pady=(10,20), row=0, column=0, sticky='nswe')
 
-keyBinding_label = tk.Label(keyBinding_frame, text="Start/Stop Hotkey:")
-keyBinding_label.grid(row=0, column=0)
-keyBinding_button = tk.Button(keyBinding_frame, text="F8", command=start_listening,width=10)
-keyBinding_button.grid(row=0,column=1,pady=(0,5))
+startKeyBinding_label = tk.Label(keyBinding_frame, text="Start/Stop Hotkey:")
+startKeyBinding_label.grid(row=0, column=0)
+startKeyBinding_button = tk.Button(keyBinding_frame, text="F8", command=lambda: start_listening("start"),width=10)
+startKeyBinding_button.grid(row=0,column=1,pady=(0,5))
+
+addTargetKeyBindig_label = tk.Label(keyBinding_frame, text="Add target Hotkey:")
+addTargetKeyBindig_label.grid(row=1, column=0)
+addTargetKeyBindig_button = tk.Button(keyBinding_frame, text="Q", command=lambda: start_listening("target"), width=10)
+addTargetKeyBindig_button.grid(row=1, column=1, pady=(0,5))
 
 # -MOUSE BUTTON SELECTION-
 selected_option=tk.StringVar()
@@ -282,26 +321,70 @@ def Clicker():
         if not IsClickerActive:
             time.sleep(0.1)
             continue    
-            
-        if Mode.get()==1: 
-            Mouse.click(MouseButtonToClick)
-            time.sleep(delay)
-        else:
-            try:
-                amountOfClicks = int(amountOfClicksMode_InputFrame.get() or 1)
-            except:
-                amountOfClicks = 10
 
-            for i in range(amountOfClicks):
-                if not IsClickerActive: break
+        if isMultiTarget.get():    
+            if Mode.get()==1: 
+                for target in targets:
+                    if not IsClickerActive: break
+                    Mouse.position = (target[0],target[1])
+                    time.sleep(0.01)
+                    Mouse.click(MouseButtonToClick)
+                time.sleep(delay)
+            else:
+                try:
+                    amountOfClicks = int(amountOfClicksMode_InputFrame.get() or 1)
+                except:
+                    amountOfClicks = 10
+
+                for i in range(amountOfClicks):
+                    for target in targets:
+                        if not IsClickerActive: break
+                        Mouse.position = (target[0],target[1])
+                        time.sleep(0.01)
+                        Mouse.click(MouseButtonToClick)
+                    time.sleep(delay)
+                IsClickerActive=False
+        else:
+            if Mode.get()==1: 
                 Mouse.click(MouseButtonToClick)
                 time.sleep(delay)
-            IsClickerActive=False
+            else:
+                try:
+                    amountOfClicks = int(amountOfClicksMode_InputFrame.get() or 1)
+                except:
+                    amountOfClicks = 10
 
-#IF THE PRESET BUTTON FOR INFINITE MODE IS PRESSED CHANGE TO CLICKER IS ACTIVE
+                for i in range(amountOfClicks):
+                    if not IsClickerActive: break
+                    Mouse.click(MouseButtonToClick)
+                    time.sleep(delay)
+                IsClickerActive=False
+
+#IF THE START/STOP HOTKEY IS PRESSED CHANGE TO CLICKER IS ACTIVE
 def on_click(key):
     global IsClickerActive
-    if (hasattr(key,'char') and key.char is not None and key.char==Hotkey) or (getattr(key,'name','') and key.name.lower()==Hotkey): IsClickerActive = not IsClickerActive
+    if (hasattr(key,'char') and key.char is not None and key.char==StartHotkey) or (getattr(key,'name','') and key.name.lower()==StartHotkey): IsClickerActive = not IsClickerActive
+
+# -EVERYTHING FOR CATCHING PRESS OF ADD TARGET HOTKEY
+def on_addTarget_click(key):
+    if (
+        ((hasattr(key,'char') and key.char is not None and key.char==addTargetHotkey) or 
+        (getattr(key,'name','') and key.name.lower()==addTargetHotkey)) and 
+        isMultiTarget.get()
+        ): 
+            time.sleep(0.1)
+            mouseListener = MouseListener(on_click=add_target)
+            mouseListener.start()
+
+def add_target(x, y, button, pressed):
+    global targets
+    if button == Button.left and pressed: 
+        targets.append([x,y])
+        return False #This line is to destroy listener
+    
+KeyboardAddTargetListener = Listener(on_press = on_addTarget_click)
+KeyboardAddTargetListener.daemon=True
+KeyboardAddTargetListener.start()
 
 #REMOVES THE CURSOR FROM ENTRY FIELD IF YOU CLICK SOMEWHERE ELSE
 def remove_focus(event):
