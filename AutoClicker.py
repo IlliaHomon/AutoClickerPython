@@ -43,7 +43,7 @@ Banned_Keys = {"control_l", "shift_l", "alt_r", "backspace", "escape", " ", "ret
 
 root = tk.Tk()
 root.title("AutoClicker")
-root.geometry("500x400")
+root.geometry("500x410")
 root.resizable(width=False, height=False)
 
 selected_option = tk.StringVar()
@@ -203,9 +203,41 @@ miliseconds_InputFrame.insert(0, "100")
 miliseconds_InputFrame.grid(pady=5, padx=5, row=0, column=7)
 miliseconds_InputFrame.bind("<FocusOut>", lambda event: save_settings())
 
+# -INTERVAL INSIDE MULTI TARGET CYCLE-
+timeMultiTargetInput_frame = tk.LabelFrame(root, text="Multitarget InCycle Click Interval",bd=2)
+timeMultiTargetInput_frame.pack(fill='x', padx=10, pady=(0,10), side='top')
+
+hoursMultiTarget_label = tk.Label(timeMultiTargetInput_frame, text="Hours:", font=("Arial", 9))
+hoursMultiTarget_label.grid(row=0, column=0, padx=(10,0))
+hoursMultiTarget_InputFrame = tk.Entry(timeMultiTargetInput_frame, width=8)
+hoursMultiTarget_InputFrame.insert(0, "0")
+hoursMultiTarget_InputFrame.grid(pady=5, padx=5, row=0, column=1)
+hoursMultiTarget_InputFrame.bind("<FocusOut>", lambda event: save_settings())
+
+minutesMultiTarget_label = tk.Label(timeMultiTargetInput_frame, text="Mins:", font=("Arial", 9))
+minutesMultiTarget_label.grid(row=0, column=2)
+minutesMultiTarget_InputFrame = tk.Entry(timeMultiTargetInput_frame, width=8)
+minutesMultiTarget_InputFrame.insert(0, "0")
+minutesMultiTarget_InputFrame.grid(pady=5, padx=5, row=0, column=3)
+minutesMultiTarget_InputFrame.bind("<FocusOut>", lambda event: save_settings())
+
+secondsMultiTarget_label = tk.Label(timeMultiTargetInput_frame, text="Secs:", font=("Arial", 9))
+secondsMultiTarget_label.grid(row=0, column=4)
+secondsMultiTarget_InputFrame = tk.Entry(timeMultiTargetInput_frame, width=8)
+secondsMultiTarget_InputFrame.insert(0, "0")
+secondsMultiTarget_InputFrame.grid(pady=5, padx=5, row=0, column=5)
+secondsMultiTarget_InputFrame.bind("<FocusOut>", lambda event: save_settings())
+
+milisecondsMultiTarget_label = tk.Label(timeMultiTargetInput_frame, text="Milisecs:", font=("Arial", 9))
+milisecondsMultiTarget_label.grid(row=0, column=6)
+milisecondsMultiTarget_InputFrame = tk.Entry(timeMultiTargetInput_frame, width=8)
+milisecondsMultiTarget_InputFrame.insert(0, "10")
+milisecondsMultiTarget_InputFrame.grid(pady=5, padx=5, row=0, column=7)
+milisecondsMultiTarget_InputFrame.bind("<FocusOut>", lambda event: save_settings())
+
 # ------SETTINGS-------
 settings_frame = tk.LabelFrame(root, text="Settings", bd=2)
-settings_frame.pack(fill='x', padx=10, pady=10, side='top')
+settings_frame.pack(fill='x', padx=10, pady=(0,10), side='top')
 settings_frame.columnconfigure(0,weight=1)
 settings_frame.columnconfigure(1,weight=1)
 
@@ -214,10 +246,10 @@ Mode = tk.IntVar()
 Mode.set(1)
 
 modeSelection_frame = tk.LabelFrame(settings_frame, text="Mode Selection", bd=2)
-modeSelection_frame.grid(row=0, column=0, sticky='we', padx=10, pady=10)
+modeSelection_frame.grid(row=0, column=0, sticky='we', padx=10, pady=(0,10))
 
 infiniteMode_toggle = tk.Radiobutton(modeSelection_frame, variable=Mode, value=1)
-infiniteMode_toggle.grid(row=0, column=0,pady=10)
+infiniteMode_toggle.grid(row=0, column=0)
 infiniteMode_label=tk.Label(modeSelection_frame, text="Repeat until stoped")
 infiniteMode_label.grid(row=0, column=1, columnspan=3, sticky='w')
 
@@ -236,7 +268,7 @@ isStayOnTop = tk.BooleanVar()
 isMultiTarget = tk.BooleanVar()
 
 otherSettings_frame = tk.LabelFrame(settings_frame, text="Other Settings", bd=2)
-otherSettings_frame.grid(row=0, column=1, sticky='nswe', padx=(0,10), pady=10)
+otherSettings_frame.grid(row=0, column=1, sticky='nswe', padx=(0,10), pady=(0,10))
 
 stayOnTop_checkButton = tk.Checkbutton(otherSettings_frame, onvalue=True, offvalue=False, variable=isStayOnTop, command=stayOnTop)
 stayOnTop_checkButton.grid(row=0, column=0)
@@ -259,7 +291,7 @@ Container_frame.rowconfigure(0,weight=1)
 
 # -KEY BINDING- 
 keyBinding_frame = tk.LabelFrame(Container_frame, text="Key Binding", bd=2 )  
-keyBinding_frame.grid(padx=(10,0), pady=(10,20), row=0, column=0, sticky='nswe')
+keyBinding_frame.grid(padx=(10,0), pady=(0,10), row=0, column=0, sticky='nswe')
 
 startKeyBinding_label = tk.Label(keyBinding_frame, text="Start/Stop Hotkey:")
 startKeyBinding_label.grid(row=0, column=0)
@@ -276,7 +308,7 @@ selected_option=tk.StringVar()
 options = ["Left", "Right", "Middle"]   
 
 mouseButtonSelection_frame = tk.LabelFrame(Container_frame, text="Mouse button selection", bd=2)
-mouseButtonSelection_frame.grid(padx=10, pady=(10,20), row=0, column=1, sticky='nswe')
+mouseButtonSelection_frame.grid(padx=10, pady=(0,10), row=0, column=1, sticky='nswe')
 
 mouseButtonSelection_label = tk.Label(mouseButtonSelection_frame, text="Mouse button to click:")
 mouseButtonSelection_label.grid(row=0, column=0)
@@ -322,12 +354,26 @@ def Clicker():
             time.sleep(0.1)
             continue    
 
-        if isMultiTarget.get():    
+        if isMultiTarget.get():   
+            try:
+                hoursMultiTarget = float(hoursMultiTarget_InputFrame.get() or 0)
+                minutesMultiTarget = float(minutesMultiTarget_InputFrame.get() or 0)
+                secondsMultiTarget = float(secondsMultiTarget_InputFrame.get() or 0)
+                milisecondsMultiTarget = float(milisecondsMultiTarget_InputFrame.get() or 0)
+                
+                delayMultiTarget = (hoursMultiTarget * 3600) + (minutesMultiTarget * 60) + secondsMultiTarget + (milisecondsMultiTarget / 1000)
+                
+                if delayMultiTarget <= 0: 
+                    delayMultiTarget = 0.01
+            except ValueError:
+                delayMultiTarget = 0.01
+
+
             if Mode.get()==1: 
                 for target in targets:
                     if not IsClickerActive: break
                     Mouse.position = (target[0],target[1])
-                    time.sleep(0.01)
+                    time.sleep(delayMultiTarget)
                     Mouse.click(MouseButtonToClick)
                 time.sleep(delay)
             else:
@@ -340,7 +386,7 @@ def Clicker():
                     for target in targets:
                         if not IsClickerActive: break
                         Mouse.position = (target[0],target[1])
-                        time.sleep(0.01)
+                        time.sleep(delayMultiTarget)
                         Mouse.click(MouseButtonToClick)
                     time.sleep(delay)
                 IsClickerActive=False
