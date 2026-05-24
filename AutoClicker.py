@@ -74,6 +74,15 @@ def load_settings():
                 miliseconds_InputFrame.delete(0, tk.END)
                 miliseconds_InputFrame.insert(0, settings_data.get("miliseconds", 0))
 
+                hoursMultiTarget_InputFrame.delete(0, tk.END)
+                hoursMultiTarget_InputFrame.insert(0, settings_data.get("hours_multitarget", 0))
+                minutesMultiTarget_InputFrame.delete(0, tk.END)
+                minutesMultiTarget_InputFrame.insert(0, settings_data.get("minutes_multitarget", 0))
+                secondsMultiTarget_InputFrame.delete(0, tk.END)
+                secondsMultiTarget_InputFrame.insert(0, settings_data.get("seconds_multitarget", 0))
+                milisecondsMultiTarget_InputFrame.delete(0, tk.END)
+                milisecondsMultiTarget_InputFrame.insert(0, settings_data.get("miliseconds_multitarget", 0))
+
                 isStayOnTop.set(settings_data.get("stay_on_top"))
                 isMultiTarget.set(settings_data.get("multi_target"))
         except(json.JSONDecodeError, KeyError): 
@@ -90,7 +99,11 @@ def save_settings():
         "seconds": int(seconds_InputFrame.get() or 0),
         "miliseconds": int(miliseconds_InputFrame.get() or 0),
         "stay_on_top": isStayOnTop.get(),
-        "multi_target": isMultiTarget.get()
+        "multi_target": isMultiTarget.get(),
+        "hours_multitarget": int(hoursMultiTarget_InputFrame.get() or 0),
+        "minutes_multitarget": int(minutesMultiTarget_InputFrame.get() or 0),
+        "seconds_multitarget": int(secondsMultiTarget_InputFrame.get() or 0),
+        "miliseconds_multitarget": int(milisecondsMultiTarget_InputFrame.get() or 0)
     }
 
     with open("settings.json", "w") as file:
