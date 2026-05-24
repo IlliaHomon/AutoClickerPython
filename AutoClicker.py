@@ -367,7 +367,7 @@ def Clicker():
             time.sleep(0.1)
             continue    
 
-        if isMultiTarget.get():   
+        if isMultiTarget.get() and targets:   
             try:
                 hoursMultiTarget = float(hoursMultiTarget_InputFrame.get() or 0)
                 minutesMultiTarget = float(minutesMultiTarget_InputFrame.get() or 0)
