@@ -40,7 +40,7 @@ key_translation={
     "backspace": "backspace"
 }
 
-Banned_Keys = {"control_l", "shift_l", "alt_r", "backspace", "escape", " ", "return", "tab"}
+Banned_Keys = {"control_l", "shift_l", "alt_r", "backspace", "escape", " ", "return", "tab", StartHotkey, addTargetHotkey, deleteTargetHotkey}
 
 root = tk.Tk()
 root.title("AutoClicker")
@@ -341,7 +341,7 @@ addTargetKeyBindig_label.grid(row=1, column=0,pady=(0,10), padx=(10,0))
 addTargetKeyBindig_button = tk.Button(keyBinding_frame, text="Q", command=lambda: start_listening("add_target"), width=10)
 addTargetKeyBindig_button.grid(row=1, column=1, pady=(0,5))
 
-deleteTargetKeyBindig_label = tk.Label(keyBinding_frame, text="Delete target Hotkey:")
+deleteTargetKeyBindig_label = tk.Label(keyBinding_frame, text="Delete last target Hotkey:")
 deleteTargetKeyBindig_label.grid(row=0, column=2,pady=(0,10), padx=(20,0))
 deleteTargetKeyBindig_button = tk.Button(keyBinding_frame, text="E", command=lambda: start_listening("delete_target"), width=10)
 deleteTargetKeyBindig_button.grid(row=0, column=3, pady=(0,5))
@@ -359,6 +359,45 @@ stopButton = tk.Button(StartStop_frame, text="Stop", font=12, command=changeClic
 stopButton.grid(row=0, column=1, padx=10, sticky='we')
 
 #------END OF GUI SETUP------
+
+# -OVERLAY WINDOW TO MAKE TARGETS VISIBLE-
+overlay = tk.Toplevel(root, bg="gray")
+canvas = tk.Canvas(overlay, bg="gray", highlightthickness=0)
+canvas.pack(fill="both", expand=True)
+root.update_idletasks()
+screen_width = root.winfo_screenwidth()    
+screen_height = root.winfo_screenheight()
+overlay.geometry(f"{screen_width}x{screen_height}+0+0") 
+overlay.overrideredirect(True)
+overlay.attributes("-topmost", True)
+overlay.attributes("-transparentcolor", "gray")
+overlay.update() 
+
+# -WIN32 CONSTANTS-
+GWL_EXSTYLE = -20
+WS_EX_LAYERED = 0x00080000
+WS_EX_TRANSPARENT = 0x00000020
+LWA_COLORKEY = 0x00000001
+COLOR_GRAY = 0x808080
+
+hwnd = overlay.winfo_id()
+
+current_style = ctypes.windll.user32.GetWindowLongW(hwnd, GWL_EXSTYLE)
+new_style = current_style | WS_EX_LAYERED | WS_EX_TRANSPARENT
+ctypes.windll.user32.SetWindowLongW(hwnd, GWL_EXSTYLE, new_style)
+
+ctypes.windll.user32.SetLayeredWindowAttributes(hwnd, COLOR_GRAY, 0, LWA_COLORKEY)
+
+print(f"Overlay Geometry State: {overlay.winfo_geometry()}")
+print(f"Overlay Visibility State: {overlay.winfo_viewable()}")
+
+def redraw():
+    canvas.delete("all")
+    for target in targets:
+        canvas.create_oval(target[0]-5, target[1]-5, target[0]+5, target[1]+5, fill="red", outline="white")
+    overlay.update_idletasks()
+
+
 
 Icon = ImageTk.PhotoImage(Image.open(icon_path))
 root.iconphoto(False, Icon)
@@ -460,6 +499,7 @@ def add_target(x, y, button, pressed):
     global targets
     if button == Button.left and pressed: 
         targets.append([x,y])
+        redraw()
         return False #This line is to destroy listener
 
 def delete_target(key):
@@ -469,6 +509,7 @@ def delete_target(key):
         isMultiTarget.get() and targets
         ):
             del targets[-1]
+            redraw()
     
 KeyboardAddTargetListener = Listener(on_press = on_addTarget_click)
 KeyboardAddTargetListener.daemon=True
