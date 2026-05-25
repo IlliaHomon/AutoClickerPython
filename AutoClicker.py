@@ -51,7 +51,7 @@ selected_option = tk.StringVar()
 
 # -READING FROM JSON-
 def load_settings():
-    global StartHotkey, AmountOfClicks, MouseButtonToClick,isStayOnTop, selected_option
+    global StartHotkey, AmountOfClicks, MouseButtonToClick,isStayOnTop, selected_option, isMultiTarget
     if os.path.exists("settings.json"):
         try:
             with open("settings.json", "r") as file:
@@ -320,7 +320,7 @@ stayOnTop_checkButton.grid(row=0, column=0)
 stayOnTop_label = tk.Label(otherSettings_frame, text="Stay on top")
 stayOnTop_label.grid(row=0, column=1)
 
-multiTarget_checkButton = tk.Checkbutton(otherSettings_frame, onvalue=True, offvalue= False, variable=isMultiTarget)
+multiTarget_checkButton = tk.Checkbutton(otherSettings_frame, onvalue=True, offvalue= False, variable=isMultiTarget, command=save_settings)
 multiTarget_checkButton.grid(row=1, column=0)
 multiTarget_label = tk.Label(otherSettings_frame, text="Multi target")
 multiTarget_label.grid(row=1, column=1)
@@ -387,6 +387,8 @@ new_style = current_style | WS_EX_LAYERED | WS_EX_TRANSPARENT
 ctypes.windll.user32.SetWindowLongW(hwnd, GWL_EXSTYLE, new_style)
 
 ctypes.windll.user32.SetLayeredWindowAttributes(hwnd, COLOR_GRAY, 0, LWA_COLORKEY)
+
+root.deiconify()
 
 print(f"Overlay Geometry State: {overlay.winfo_geometry()}")
 print(f"Overlay Visibility State: {overlay.winfo_viewable()}")
