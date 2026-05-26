@@ -55,7 +55,6 @@ Banned_Keys = {"control_l", "shift_l", "alt_r", "backspace", "escape", " ", "ret
 
 root = tk.Tk()
 root.title("AutoClicker")
-root.geometry("500x425")
 root.resizable(width=False, height=False)
 
 selected_option = tk.StringVar()
@@ -391,7 +390,7 @@ addTargetKeyBinding_button.grid(row=1, column=1, pady=(0,5))
 deleteTargetKeyBindig_label = tk.Label(keyBinding_frame, text="Delete last target Hotkey:")
 deleteTargetKeyBindig_label.grid(row=0, column=2,pady=(0,10), padx=(20,0))
 deleteTargetKeyBinding_button = tk.Button(keyBinding_frame, text="-", command=lambda: start_listening("delete_target"), width=10)
-deleteTargetKeyBinding_button.grid(row=0, column=3, pady=(0,5))
+deleteTargetKeyBinding_button.grid(row=0, column=3, pady=(0,5), padx=(0,10))
 
 # -START AND STOP BUTTONS-  
 StartStop_frame = tk.Frame(root)
@@ -400,16 +399,20 @@ StartStop_frame.columnconfigure(0, weight=1)
 StartStop_frame.columnconfigure(1, weight=1)
 
 startButton = tk.Button(StartStop_frame, text="Start", font=12, command=changeClickerState_toActive, height=2)
-startButton.grid(row=0, column=0, padx=(10,0),sticky='we')
+startButton.grid(row=0, column=0, padx=(10,0), pady=(0,10), sticky='we')
 
 stopButton = tk.Button(StartStop_frame, text="Stop", font=12, command=changeClickerState_toUnActive, height=2)
-stopButton.grid(row=0, column=1, padx=10, sticky='we')
+stopButton.grid(row=0, column=1, padx=10, pady=(0,10), sticky='we')
+
+# -LOADING ROOT-
+root.update()
+root.minsize(root.winfo_width(), root.winfo_height())
 
 #------END OF GUI SETUP------
 
 # -OVERLAY WINDOW TO MAKE TARGETS VISIBLE-
 overlay = tk.Toplevel(root, bg="gray")
-#overlay.transient(root)
+overlay.transient(root)
 canvas = tk.Canvas(overlay, bg="gray", highlightthickness=0)
 canvas.pack(fill="both", expand=True)
 root.update_idletasks()
