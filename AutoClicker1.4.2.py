@@ -422,7 +422,6 @@ overlay.geometry(f"{screen_width}x{screen_height}+0+0")
 overlay.overrideredirect(True)
 overlay.attributes("-topmost", True)
 overlay.attributes("-transparentcolor", "gray")
-overlay.attributes("-toolwindow", True)
 overlay.update() 
 
 # -----MAKES CANVA CLICK-THROUGH-----
