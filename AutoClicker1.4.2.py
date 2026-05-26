@@ -14,6 +14,11 @@ import json
 MyAppId = 'IlliaHomon.AutoClickerPython.1.2'
 ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(MyAppId)
 
+try:
+    ctypes.windll.shcore.SetProcessDpiAwareness(1) 
+except AttributeError:
+    ctypes.windll.user32.SetProcessDPIAware()
+
 if hasattr(sys, '_MEIPASS'):
     icon_path = os.path.join(sys._MEIPASS, 'icon.ico')
 else: icon_path = 'icon.ico'
@@ -121,6 +126,12 @@ def save_settings():
 
     with open(settings_path, "w") as file:
         json.dump(settings_data, file, indent=4)
+
+    try:
+        FILE_ATTRIBUTE_HIDDEN = 0x02
+        ctypes.windll.kernel32.SetFileAttributesW(settings_path, FILE_ATTRIBUTE_HIDDEN)
+    except Exception as e:
+        print(f"Could not hide settings file: {e}")
 
 # -KEY BINDING FUNCTIONS-
 
