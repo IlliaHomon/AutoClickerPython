@@ -57,7 +57,7 @@ selected_option = tk.StringVar()
 
 # -READING FROM JSON-
 def load_settings():
-    global StartHotkey, AmountOfClicks, MouseButtonToClick,isStayOnTop, selected_option, isMultiTarget
+    global StartHotkey, AmountOfClicks, MouseButtonToClick,isStayOnTop, selected_option, isMultiTarget, addTargetHotkey, deleteTargetHotkey
     if os.path.exists(settings_path):
         try:
             with open(settings_path, "r") as file:
@@ -398,6 +398,7 @@ stopButton.grid(row=0, column=1, padx=10, sticky='we')
 
 # -OVERLAY WINDOW TO MAKE TARGETS VISIBLE-
 overlay = tk.Toplevel(root, bg="gray")
+#overlay.transient(root)
 canvas = tk.Canvas(overlay, bg="gray", highlightthickness=0)
 canvas.pack(fill="both", expand=True)
 root.update_idletasks()
@@ -407,6 +408,7 @@ overlay.geometry(f"{screen_width}x{screen_height}+0+0")
 overlay.overrideredirect(True)
 overlay.attributes("-topmost", True)
 overlay.attributes("-transparentcolor", "gray")
+overlay.attributes("-toolwindow", True)
 overlay.update() 
 
 # -----MAKES CANVA CLICK-THROUGH-----
@@ -545,6 +547,18 @@ def delete_target(key):
         ):
             del targets[-1]
             redraw()
+
+#REMOVES THE CURSOR FROM ENTRY FIELD IF YOU CLICK SOMEWHERE ELSE
+def remove_focus(event):
+    if event.widget.winfo_class() == "Entry": return
+    root.focus_set()
+
+root.bind("<Button-1>", remove_focus)
+
+load_settings()
+
+thread = threading.Thread(target=Clicker, daemon=True)
+thread.start()
     
 KeyboardAddTargetListener = Listener(on_press = on_addTarget_click)
 KeyboardAddTargetListener.daemon=True
@@ -554,19 +568,8 @@ KeyboardDeleteTargetListener = Listener(on_press=delete_target)
 KeyboardDeleteTargetListener.daemon=True
 KeyboardDeleteTargetListener.start()
 
-#REMOVES THE CURSOR FROM ENTRY FIELD IF YOU CLICK SOMEWHERE ELSE
-def remove_focus(event):
-    if event.widget.winfo_class() == "Entry": return
-    root.focus_set()
-
-thread = threading.Thread(target=Clicker, daemon=True)
-thread.start()
-
 KeyboardListener = Listener(on_press=on_click)
 KeyboardListener.daemon=True
 KeyboardListener.start()   
 
-root.bind("<Button-1>", remove_focus)
-
-load_settings()
 root.mainloop()
