@@ -4,7 +4,7 @@ from pynput.mouse import Listener as MouseListener
 import time
 import threading
 import tkinter as tk
-from tkinter import ttk
+from tkinter import ttk,filedialog
 from PIL import Image, ImageTk
 import ctypes
 import sys
@@ -22,9 +22,10 @@ AmountOfClicks = 10
 IsClickerActive=False
 MouseButtonToClick = Button.left  
 StartHotkey="f8"
-addTargetHotkey="q"
-deleteTargetHotkey="e"
+addTargetHotkey="="
+deleteTargetHotkey="-"
 targets = []
+showCursor = True
 
 Button_mapping={
     "Left": Button.left,
@@ -59,6 +60,10 @@ def load_settings():
 
                 StartHotkey=settings_data.get("start_hotkey")
                 startKeyBinding_button.config(text=f"{StartHotkey.capitalize()}")
+                addTargetHotkey=settings_data.get("add_target_hotkey")
+                addTargetKeyBinding_button.config(text=f"{addTargetHotkey.capitalize()}")
+                deleteTargetHotkey=settings_data.get("delete_target_hotkey")
+                deleteTargetKeyBinding_button.config(text=f"{deleteTargetHotkey.capitalize()}")
 
                 AmountOfClicks=settings_data.get("amount_of_clicks")
 
@@ -93,6 +98,8 @@ def load_settings():
 def save_settings():
     settings_data = {
         "start_hotkey": StartHotkey,
+        "add_target_hotkey": addTargetHotkey,
+        "delete_target_hotkey": deleteTargetHotkey,
         "amount_of_clicks": AmountOfClicks,
         "mouse_button_to_click": selected_option.get(),
         "hours": int(hours_InputFrame.get() or 0),
@@ -114,13 +121,13 @@ def save_settings():
 
 def start_listening(target):
     startKeyBinding_button.config(state='disabled')
-    addTargetKeyBindig_button.config(state='disabled')
+    addTargetKeyBinding_button.config(state='disabled')
 
     if target == "start":
         startKeyBinding_button.config(text="Press any key...")
     elif target=="add_target":
-        addTargetKeyBindig_button.config(text="Press any key...")
-    else: deleteTargetKeyBindig_button.config(text="Press any key...")
+        addTargetKeyBinding_button.config(text="Press any key...")
+    else: deleteTargetKeyBinding_button.config(text="Press any key...")
 
     root.bind("<Key>", lambda event: capture_key(event, target))
 
@@ -133,8 +140,8 @@ def capture_key(event, target):
         if key_keysym in Banned_Keys:  
             root.unbind("<Key>")    
             startKeyBinding_button.config(text=f"{StartHotkey.capitalize()}", state='normal')
-            addTargetKeyBindig_button.config(text=f"{addTargetHotkey.capitalize()}", state='normal')
-            deleteTargetKeyBindig_button.config(text=f"{deleteTargetHotkey.capitalize()}", state='normal')
+            addTargetKeyBinding_button.config(text=f"{addTargetHotkey.capitalize()}", state='normal')
+            deleteTargetKeyBinding_button.config(text=f"{deleteTargetHotkey.capitalize()}", state='normal')
             return
 
         new_key = event.char if event.char else event.keysym
@@ -143,15 +150,15 @@ def capture_key(event, target):
         if translation: StartHotkey = translation
         root.unbind("<Key>")
         startKeyBinding_button.config(text=f"{StartHotkey.capitalize()}", state='normal')
-        addTargetKeyBindig_button.config(text=f"{addTargetHotkey.capitalize()}", state='normal')
-        deleteTargetKeyBindig_button.config(text=f"{deleteTargetHotkey.capitalize()}", state='normal')
+        addTargetKeyBinding_button.config(text=f"{addTargetHotkey.capitalize()}", state='normal')
+        deleteTargetKeyBinding_button.config(text=f"{deleteTargetHotkey.capitalize()}", state='normal')
 
     elif target == "add_target":
         if key_keysym in Banned_Keys:  
             root.unbind("<Key>")    
-            addTargetKeyBindig_button.config(text=f"{addTargetHotkey.capitalize()}", state='normal')
+            addTargetKeyBinding_button.config(text=f"{addTargetHotkey.capitalize()}", state='normal')
             startKeyBinding_button.config(text=f"{StartHotkey.capitalize()}", state='normal')
-            deleteTargetKeyBindig_button.config(text=f"{deleteTargetHotkey.capitalize()}", state='normal')
+            deleteTargetKeyBinding_button.config(text=f"{deleteTargetHotkey.capitalize()}", state='normal')
             return
 
         new_key = event.char if event.char else event.keysym
@@ -159,16 +166,16 @@ def capture_key(event, target):
         translation = key_translation.get(new_key,new_key)
         if translation: addTargetHotkey = translation
         root.unbind("<Key>")
-        addTargetKeyBindig_button.config(text=f"{addTargetHotkey.capitalize()}", state='normal')
+        addTargetKeyBinding_button.config(text=f"{addTargetHotkey.capitalize()}", state='normal')
         startKeyBinding_button.config(text=f"{StartHotkey.capitalize()}", state='normal')
-        deleteTargetKeyBindig_button.config(text=f"{deleteTargetHotkey.capitalize()}", state='normal')
+        deleteTargetKeyBinding_button.config(text=f"{deleteTargetHotkey.capitalize()}", state='normal')
     
     else:
         if key_keysym in Banned_Keys:  
             root.unbind("<Key>")    
-            addTargetKeyBindig_button.config(text=f"{addTargetHotkey.capitalize()}", state='normal')
+            addTargetKeyBinding_button.config(text=f"{addTargetHotkey.capitalize()}", state='normal')
             startKeyBinding_button.config(text=f"{StartHotkey.capitalize()}", state='normal')
-            deleteTargetKeyBindig_button.config(text=f"{deleteTargetHotkey.capitalize()}", state='normal')
+            deleteTargetKeyBinding_button.config(text=f"{deleteTargetHotkey.capitalize()}", state='normal')
             return
         
         new_key = event.char if event.char else event.keysym
@@ -176,9 +183,9 @@ def capture_key(event, target):
         translation = key_translation.get(new_key,new_key)
         if translation: deleteTargetHotkey = translation
         root.unbind("<Key>")
-        addTargetKeyBindig_button.config(text=f"{addTargetHotkey.capitalize()}", state='normal')
+        addTargetKeyBinding_button.config(text=f"{addTargetHotkey.capitalize()}", state='normal')
         startKeyBinding_button.config(text=f"{StartHotkey.capitalize()}", state='normal')
-        deleteTargetKeyBindig_button.config(text=f"{deleteTargetHotkey.capitalize()}", state='normal')
+        deleteTargetKeyBinding_button.config(text=f"{deleteTargetHotkey.capitalize()}", state='normal')
 
     save_settings()
 
@@ -204,6 +211,21 @@ def stayOnTop():
     if isStayOnTop.get(): root.attributes("-topmost", True)
     else: root.attributes("-topmost", False)
     save_settings()
+
+# -FUNCTIONS FOR SAVING AND LOADING TARGETS-
+def saveTargets():
+   file_path = filedialog.asksaveasfilename(defaultextension=".json", filetypes=[("JSON files","*.json")])
+   if file_path:
+       with open(file_path,"w") as file:
+           json.dump(targets, file, indent=4)
+
+def loadTargets():
+    global targets
+    file_path = filedialog.askopenfilename(filetypes=[("JSON files", "*.json")])
+    if file_path:
+        with open(file_path, "r") as file:
+            targets = json.load(file)
+        redraw()
 
 #-------BEGGINING OF GUI SETUP--------
 
@@ -318,12 +340,21 @@ otherSettings_frame.grid(row=0, column=1, sticky='nswe', padx=(0,10), pady=(0,10
 stayOnTop_checkButton = tk.Checkbutton(otherSettings_frame, onvalue=True, offvalue=False, variable=isStayOnTop, command=stayOnTop)
 stayOnTop_checkButton.grid(row=0, column=0)
 stayOnTop_label = tk.Label(otherSettings_frame, text="Stay on top")
-stayOnTop_label.grid(row=0, column=1)
+stayOnTop_label.grid(row=0, column=1, sticky='w')
 
 multiTarget_checkButton = tk.Checkbutton(otherSettings_frame, onvalue=True, offvalue= False, variable=isMultiTarget, command=save_settings)
 multiTarget_checkButton.grid(row=1, column=0)
 multiTarget_label = tk.Label(otherSettings_frame, text="Multi target")
-multiTarget_label.grid(row=1, column=1)
+multiTarget_label.grid(row=1, column=1, sticky='w')
+
+save_loadButtons_frame = tk.Frame(otherSettings_frame)
+save_loadButtons_frame.grid(row=2, column=0, columnspan=10, sticky='we')
+
+saveTargets_button = tk.Button(save_loadButtons_frame, text="Save targets", command=saveTargets)
+saveTargets_button.grid(row=0, column=0, padx=5)
+
+loadTargets_button = tk.Button(save_loadButtons_frame, text="Load targets", command=loadTargets)
+loadTargets_button.grid(row=0, column=1, padx=(0,5))
 
 # -----------------------
 
@@ -338,13 +369,13 @@ startKeyBinding_button.grid(row=0,column=1,pady=(0,5))
 
 addTargetKeyBindig_label = tk.Label(keyBinding_frame, text="Add target Hotkey:")
 addTargetKeyBindig_label.grid(row=1, column=0,pady=(0,10), padx=(10,0))
-addTargetKeyBindig_button = tk.Button(keyBinding_frame, text="Q", command=lambda: start_listening("add_target"), width=10)
-addTargetKeyBindig_button.grid(row=1, column=1, pady=(0,5))
+addTargetKeyBinding_button = tk.Button(keyBinding_frame, text="Q", command=lambda: start_listening("add_target"), width=10)
+addTargetKeyBinding_button.grid(row=1, column=1, pady=(0,5))
 
 deleteTargetKeyBindig_label = tk.Label(keyBinding_frame, text="Delete last target Hotkey:")
 deleteTargetKeyBindig_label.grid(row=0, column=2,pady=(0,10), padx=(20,0))
-deleteTargetKeyBindig_button = tk.Button(keyBinding_frame, text="E", command=lambda: start_listening("delete_target"), width=10)
-deleteTargetKeyBindig_button.grid(row=0, column=3, pady=(0,5))
+deleteTargetKeyBinding_button = tk.Button(keyBinding_frame, text="E", command=lambda: start_listening("delete_target"), width=10)
+deleteTargetKeyBinding_button.grid(row=0, column=3, pady=(0,5))
 
 # -START AND STOP BUTTONS-  
 StartStop_frame = tk.Frame(root)
@@ -373,6 +404,8 @@ overlay.attributes("-topmost", True)
 overlay.attributes("-transparentcolor", "gray")
 overlay.update() 
 
+# -----MAKES CANVA CLICK-THROUGH-----
+
 # -WIN32 CONSTANTS-
 GWL_EXSTYLE = -20
 WS_EX_LAYERED = 0x00080000
@@ -380,15 +413,17 @@ WS_EX_TRANSPARENT = 0x00000020
 LWA_COLORKEY = 0x00000001
 COLOR_GRAY = 0x808080
 
-hwnd = overlay.winfo_id()
+overlay_id = overlay.winfo_id()
 
-current_style = ctypes.windll.user32.GetWindowLongW(hwnd, GWL_EXSTYLE)
+current_style = ctypes.windll.user32.GetWindowLongW(overlay_id, GWL_EXSTYLE)
 new_style = current_style | WS_EX_LAYERED | WS_EX_TRANSPARENT
-ctypes.windll.user32.SetWindowLongW(hwnd, GWL_EXSTYLE, new_style)
+ctypes.windll.user32.SetWindowLongW(overlay_id, GWL_EXSTYLE, new_style)
 
-ctypes.windll.user32.SetLayeredWindowAttributes(hwnd, COLOR_GRAY, 0, LWA_COLORKEY)
+ctypes.windll.user32.SetLayeredWindowAttributes(overlay_id, COLOR_GRAY, 0, LWA_COLORKEY)
 
 root.deiconify()
+
+# ----------------------------------
 
 print(f"Overlay Geometry State: {overlay.winfo_geometry()}")
 print(f"Overlay Visibility State: {overlay.winfo_viewable()}")
@@ -398,8 +433,6 @@ def redraw():
     for target in targets:
         canvas.create_oval(target[0]-5, target[1]-5, target[0]+5, target[1]+5, fill="red", outline="white")
     overlay.update_idletasks()
-
-
 
 Icon = ImageTk.PhotoImage(Image.open(icon_path))
 root.iconphoto(False, Icon)
@@ -411,7 +444,6 @@ def Clicker():
     global IsClickerActive
     
     while True:
-
         try:
             hours = float(hours_InputFrame.get() or 0)
             minutes = float(minutes_InputFrame.get() or 0)
@@ -442,7 +474,6 @@ def Clicker():
                     delayMultiTarget = 0.01
             except ValueError:
                 delayMultiTarget = 0.01
-
 
             if Mode.get()==1: 
                 for target in targets:
@@ -483,7 +514,7 @@ def Clicker():
 
 #IF THE START/STOP HOTKEY IS PRESSED CHANGE TO CLICKER IS ACTIVE
 def on_click(key):
-    global IsClickerActive
+    global IsClickerActive, showCursor
     if (hasattr(key,'char') and key.char is not None and key.char==StartHotkey) or (getattr(key,'name','') and key.name.lower()==StartHotkey): IsClickerActive = not IsClickerActive
 
 # -EVERYTHING FOR CATCHING PRESS OF ADD TARGET HOTKEY
@@ -537,5 +568,3 @@ root.bind("<Button-1>", remove_focus)
 
 load_settings()
 root.mainloop()
-
-#time.sleep(delay*AmountOfClicks+1)
