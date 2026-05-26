@@ -58,9 +58,9 @@ selected_option = tk.StringVar()
 # -READING FROM JSON-
 def load_settings():
     global StartHotkey, AmountOfClicks, MouseButtonToClick,isStayOnTop, selected_option, isMultiTarget
-    if os.path.exists("settings.json"):
+    if os.path.exists(settings_path):
         try:
-            with open("settings.json", "r") as file:
+            with open(settings_path, "r") as file:
                 settings_data = json.load(file)
 
                 StartHotkey=settings_data.get("start_hotkey")
@@ -119,7 +119,7 @@ def save_settings():
         "miliseconds_multitarget": int(milisecondsMultiTarget_InputFrame.get() or 0)
     }
 
-    with open("settings.json", "w") as file:
+    with open(settings_path, "w") as file:
         json.dump(settings_data, file, indent=4)
 
 # -KEY BINDING FUNCTIONS-
