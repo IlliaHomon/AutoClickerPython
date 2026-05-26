@@ -18,6 +18,11 @@ if hasattr(sys, '_MEIPASS'):
     icon_path = os.path.join(sys._MEIPASS, 'icon.ico')
 else: icon_path = 'icon.ico'
 
+if hasattr(sys, '_MEIPASS'):
+    settings_path = os.path.join(os.path.dirname(sys.executable), "settings.json")
+else:
+    settings_path = "settings.json"
+
 AmountOfClicks = 10
 IsClickerActive=False
 MouseButtonToClick = Button.left  
