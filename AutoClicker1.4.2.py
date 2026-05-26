@@ -123,6 +123,12 @@ def save_settings():
         "miliseconds_multitarget": int(milisecondsMultiTarget_InputFrame.get() or 0)
     }
 
+    try:
+        FILE_ATTRIBUTE_NORMAL = 0x80
+        ctypes.windll.kernel32.SetFileAttributesW(settings_path, FILE_ATTRIBUTE_NORMAL)
+    except Exception as e:
+        print(f"Could not unhide file before saving: {e}")
+
     with open(settings_path, "w") as file:
         json.dump(settings_data, file, indent=4)
 
@@ -542,14 +548,14 @@ def on_addTarget_click(key):
         isMultiTarget.get()
         ): 
             time.sleep(0.1)
-            mouseListener = MouseListener(on_click=add_target)
+            mouseListener = MouseListener(on_click=add_target, suppress=True)
             mouseListener.start()
 
 def add_target(x, y, button, pressed):
     global targets
     if button == Button.left and pressed: 
         targets.append([x,y])
-        redraw()
+        root.after(0,redraw)
         return False #This line is to destroy listener
 
 def delete_target(key):
@@ -559,7 +565,7 @@ def delete_target(key):
         isMultiTarget.get() and targets
         ):
             del targets[-1]
-            redraw()
+            root.after(0,redraw)
 
 #REMOVES THE CURSOR FROM ENTRY FIELD IF YOU CLICK SOMEWHERE ELSE
 def remove_focus(event):
