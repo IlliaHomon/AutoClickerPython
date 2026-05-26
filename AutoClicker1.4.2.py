@@ -369,12 +369,12 @@ startKeyBinding_button.grid(row=0,column=1,pady=(0,5))
 
 addTargetKeyBindig_label = tk.Label(keyBinding_frame, text="Add target Hotkey:")
 addTargetKeyBindig_label.grid(row=1, column=0,pady=(0,10), padx=(10,0))
-addTargetKeyBinding_button = tk.Button(keyBinding_frame, text="Q", command=lambda: start_listening("add_target"), width=10)
+addTargetKeyBinding_button = tk.Button(keyBinding_frame, text="=", command=lambda: start_listening("add_target"), width=10)
 addTargetKeyBinding_button.grid(row=1, column=1, pady=(0,5))
 
 deleteTargetKeyBindig_label = tk.Label(keyBinding_frame, text="Delete last target Hotkey:")
 deleteTargetKeyBindig_label.grid(row=0, column=2,pady=(0,10), padx=(20,0))
-deleteTargetKeyBinding_button = tk.Button(keyBinding_frame, text="E", command=lambda: start_listening("delete_target"), width=10)
+deleteTargetKeyBinding_button = tk.Button(keyBinding_frame, text="-", command=lambda: start_listening("delete_target"), width=10)
 deleteTargetKeyBinding_button.grid(row=0, column=3, pady=(0,5))
 
 # -START AND STOP BUTTONS-  
@@ -424,9 +424,6 @@ ctypes.windll.user32.SetLayeredWindowAttributes(overlay_id, COLOR_GRAY, 0, LWA_C
 root.deiconify()
 
 # ----------------------------------
-
-print(f"Overlay Geometry State: {overlay.winfo_geometry()}")
-print(f"Overlay Visibility State: {overlay.winfo_viewable()}")
 
 def redraw():
     canvas.delete("all")
