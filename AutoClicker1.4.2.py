@@ -342,7 +342,7 @@ mouseButtonSelection_label = tk.Label(modeSelection_frame, text="Mouse button to
 mouseButtonSelection_label.grid(row=3, column=0, columnspan=3)
 mouseButtonSelection_dropdown = ttk.Combobox(modeSelection_frame, state="readonly", values=options, textvariable=selected_option, width=10)
 if not selected_option.get(): mouseButtonSelection_dropdown.current(0)
-mouseButtonSelection_dropdown.grid(row=3, column=3, pady=(0,5))
+mouseButtonSelection_dropdown.grid(row=3, column=3, pady=(0,5), padx=(0,5))
 mouseButtonSelection_dropdown.bind("<<ComboboxSelected>>", update_mouse_button)
 
 # -OTHER SETTINGS-
@@ -390,7 +390,7 @@ addTargetKeyBinding_button.grid(row=1, column=1, pady=(0,5))
 deleteTargetKeyBindig_label = tk.Label(keyBinding_frame, text="Delete last target Hotkey:")
 deleteTargetKeyBindig_label.grid(row=0, column=2,pady=(0,10), padx=(20,0))
 deleteTargetKeyBinding_button = tk.Button(keyBinding_frame, text="-", command=lambda: start_listening("delete_target"), width=10)
-deleteTargetKeyBinding_button.grid(row=0, column=3, pady=(0,5), padx=(0,10))
+deleteTargetKeyBinding_button.grid(row=0, column=3, pady=(0,5), padx=(0,5))
 
 # -START AND STOP BUTTONS-  
 StartStop_frame = tk.Frame(root)
