@@ -548,7 +548,7 @@ def on_addTarget_click(key):
         isMultiTarget.get()
         ): 
             time.sleep(0.1)
-            mouseListener = MouseListener(on_click=add_target, suppress=True)
+            mouseListener = MouseListener(on_click=add_target)
             mouseListener.start()
 
 def add_target(x, y, button, pressed):
