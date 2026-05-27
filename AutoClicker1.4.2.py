@@ -421,7 +421,6 @@ root.minsize(root.winfo_width(), root.winfo_height())
 
 # -OVERLAY WINDOW TO MAKE TARGETS VISIBLE-
 overlay = tk.Toplevel(root, bg="gray")
-#overlay.transient(root)
 canvas = tk.Canvas(overlay, bg="gray", highlightthickness=0)
 canvas.pack(fill="both", expand=True)
 root.update_idletasks()
@@ -431,6 +430,7 @@ overlay.geometry(f"{screen_width}x{screen_height}+0+0")
 overlay.overrideredirect(True)
 overlay.attributes("-topmost", True)
 overlay.attributes("-transparentcolor", "gray")
+overlay.attributes("-toolwindow", True)
 overlay.update() 
 
 # -----MAKES CANVA CLICK-THROUGH-----
