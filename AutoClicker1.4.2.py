@@ -62,7 +62,7 @@ selected_option = tk.StringVar()
 
 # -READING FROM JSON-
 def load_settings():
-    global StartHotkey, AmountOfClicks, MouseButtonToClick,isStayOnTop, selected_option, isMultiTarget, addTargetHotkey, deleteTargetHotkey
+    global StartHotkey, AmountOfClicks, MouseButtonToClick,isStayOnTop, selected_option, isMultiTarget, addTargetHotkey, deleteTargetHotkey, Banned_Keys
     if os.path.exists(settings_path):
         try:
             with open(settings_path, "r") as file:
@@ -101,6 +101,8 @@ def load_settings():
 
                 isStayOnTop.set(settings_data.get("stay_on_top"))
                 isMultiTarget.set(settings_data.get("multi_target"))
+
+                Banned_Keys = {StartHotkey, addTargetHotkey, deleteTargetHotkey}
         except(json.JSONDecodeError, KeyError): 
             print("Settings file corrupted or missing keys. Using default configurations.")
 
