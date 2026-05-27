@@ -108,6 +108,7 @@ def load_settings():
 
 # -WRITING TO JSON-
 def save_settings():
+    global Banned_Keys
     settings_data = {
         "start_hotkey": StartHotkey,
         "add_target_hotkey": addTargetHotkey,
@@ -141,6 +142,8 @@ def save_settings():
     except Exception as e:
         print(f"Could not hide settings file: {e}")
 
+    Banned_Keys = {StartHotkey, addTargetHotkey, deleteTargetHotkey}
+
 # -KEY BINDING FUNCTIONS-
 
 def start_listening(target):
@@ -148,10 +151,10 @@ def start_listening(target):
     addTargetKeyBinding_button.config(state='disabled')
 
     if target == "start":
-        startKeyBinding_button.config(text="Press any key...")
+        startKeyBinding_button.config(text="Press F1-F12...")
     elif target=="add_target":
-        addTargetKeyBinding_button.config(text="Press any key...")
-    else: deleteTargetKeyBinding_button.config(text="Press any key...")
+        addTargetKeyBinding_button.config(text="Press F1-F12...")
+    else: deleteTargetKeyBinding_button.config(text="Press F1-F12...")
 
     root.bind("<Key>", lambda event: capture_key(event, target))
 
@@ -383,7 +386,7 @@ loadTargets_button.grid(row=0, column=1, padx=(0,5))
 # -----------------------
 
 # -KEY BINDING- 
-keyBinding_frame = tk.LabelFrame(root, text="Key Binding", bd=2 )  
+keyBinding_frame = tk.LabelFrame(root, text="Key Binding(F1-F12)", bd=2 )  
 keyBinding_frame.pack(padx=10, pady=(0,10), fill='x')
 
 startKeyBinding_label = tk.Label(keyBinding_frame, text="Start/Stop Hotkey:")
