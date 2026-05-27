@@ -31,9 +31,9 @@ else:
 AmountOfClicks = 10
 IsClickerActive=False
 MouseButtonToClick = Button.left  
-StartHotkey="f8"
-addTargetHotkey="="
-deleteTargetHotkey="-"
+StartHotkey="f5"
+addTargetHotkey="f6"
+deleteTargetHotkey="f7"
 targets = []
 showCursor = True
 
@@ -51,7 +51,8 @@ key_translation={
     "backspace": "backspace"
 }
 
-Banned_Keys = {"control_l", "shift_l", "alt_r", "backspace", "escape", " ", "return", "tab", StartHotkey, addTargetHotkey, deleteTargetHotkey}
+Allowed_Keys = {"f1", "f2", "f3", "f4", "f5","f6", "f7", "f8", "f9", "f10", "f11", "f12"}
+Banned_Keys = {StartHotkey, addTargetHotkey, deleteTargetHotkey}
 
 root = tk.Tk()
 root.title("AutoClicker")
@@ -158,7 +159,7 @@ def capture_key(event, target):
     key_keysym = event.keysym.lower()
 
     if target == "start":
-        if key_keysym in Banned_Keys:  
+        if key_keysym not in Allowed_Keys or key_keysym in Banned_Keys:  
             root.unbind("<Key>")    
             startKeyBinding_button.config(text=f"{StartHotkey.capitalize()}", state='normal')
             addTargetKeyBinding_button.config(text=f"{addTargetHotkey.capitalize()}", state='normal')
@@ -175,7 +176,7 @@ def capture_key(event, target):
         deleteTargetKeyBinding_button.config(text=f"{deleteTargetHotkey.capitalize()}", state='normal')
 
     elif target == "add_target":
-        if key_keysym in Banned_Keys:  
+        if key_keysym not in Allowed_Keys or key_keysym in Banned_Keys:  
             root.unbind("<Key>")    
             addTargetKeyBinding_button.config(text=f"{addTargetHotkey.capitalize()}", state='normal')
             startKeyBinding_button.config(text=f"{StartHotkey.capitalize()}", state='normal')
@@ -192,7 +193,7 @@ def capture_key(event, target):
         deleteTargetKeyBinding_button.config(text=f"{deleteTargetHotkey.capitalize()}", state='normal')
     
     else:
-        if key_keysym in Banned_Keys:  
+        if key_keysym not in Allowed_Keys or key_keysym in Banned_Keys:  
             root.unbind("<Key>")    
             addTargetKeyBinding_button.config(text=f"{addTargetHotkey.capitalize()}", state='normal')
             startKeyBinding_button.config(text=f"{StartHotkey.capitalize()}", state='normal')
@@ -385,17 +386,17 @@ keyBinding_frame.pack(padx=10, pady=(0,10), fill='x')
 
 startKeyBinding_label = tk.Label(keyBinding_frame, text="Start/Stop Hotkey:")
 startKeyBinding_label.grid(row=0, column=0, padx=(10,0))
-startKeyBinding_button = tk.Button(keyBinding_frame, text="F8", command=lambda: start_listening("start"),width=10)
+startKeyBinding_button = tk.Button(keyBinding_frame, text="F5", command=lambda: start_listening("start"),width=10)
 startKeyBinding_button.grid(row=0,column=1,pady=(0,5))
 
 addTargetKeyBindig_label = tk.Label(keyBinding_frame, text="Add target Hotkey:")
 addTargetKeyBindig_label.grid(row=1, column=0,pady=(0,10), padx=(10,0))
-addTargetKeyBinding_button = tk.Button(keyBinding_frame, text="=", command=lambda: start_listening("add_target"), width=10)
+addTargetKeyBinding_button = tk.Button(keyBinding_frame, text="F6", command=lambda: start_listening("add_target"), width=10)
 addTargetKeyBinding_button.grid(row=1, column=1, pady=(0,5))
 
 deleteTargetKeyBindig_label = tk.Label(keyBinding_frame, text="Delete last target Hotkey:")
 deleteTargetKeyBindig_label.grid(row=0, column=2,pady=(0,10), padx=(20,0))
-deleteTargetKeyBinding_button = tk.Button(keyBinding_frame, text="-", command=lambda: start_listening("delete_target"), width=10)
+deleteTargetKeyBinding_button = tk.Button(keyBinding_frame, text="F7", command=lambda: start_listening("delete_target"), width=10)
 deleteTargetKeyBinding_button.grid(row=0, column=3, pady=(0,5), padx=(0,5))
 
 # -START AND STOP BUTTONS-  
@@ -418,7 +419,7 @@ root.minsize(root.winfo_width(), root.winfo_height())
 
 # -OVERLAY WINDOW TO MAKE TARGETS VISIBLE-
 overlay = tk.Toplevel(root, bg="gray")
-overlay.transient(root)
+#overlay.transient(root)
 canvas = tk.Canvas(overlay, bg="gray", highlightthickness=0)
 canvas.pack(fill="both", expand=True)
 root.update_idletasks()
