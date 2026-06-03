@@ -30,6 +30,7 @@ else:
 
 AmountOfClicks = 10
 IsClickerActive=False
+isKeyBindingActive=False
 MouseButtonToClick = Button.left  
 StartHotkey="f5"
 addTargetHotkey="f6"
@@ -147,8 +148,11 @@ def save_settings():
 # -KEY BINDING FUNCTIONS-
 
 def start_listening(target):
+    global isKeyBindingActive
     startKeyBinding_button.config(state='disabled')
     addTargetKeyBinding_button.config(state='disabled')
+    deleteTargetKeyBinding_button.config(state='disabled')
+    isKeyBindingActive=True
 
     if target == "start":
         startKeyBinding_button.config(text="Press F1-F12...")
@@ -159,7 +163,7 @@ def start_listening(target):
     root.bind("<Key>", lambda event: capture_key(event, target))
 
 def capture_key(event, target):
-    global StartHotkey, addTargetHotkey, deleteTargetHotkey
+    global StartHotkey, addTargetHotkey, deleteTargetHotkey, isKeyBindingActive
 
     key_keysym = event.keysym.lower()
 
@@ -169,6 +173,7 @@ def capture_key(event, target):
             startKeyBinding_button.config(text=f"{StartHotkey.capitalize()}", state='normal')
             addTargetKeyBinding_button.config(text=f"{addTargetHotkey.capitalize()}", state='normal')
             deleteTargetKeyBinding_button.config(text=f"{deleteTargetHotkey.capitalize()}", state='normal')
+            isKeyBindingActive=False
             return
 
         new_key = event.char if event.char else event.keysym
@@ -186,6 +191,7 @@ def capture_key(event, target):
             addTargetKeyBinding_button.config(text=f"{addTargetHotkey.capitalize()}", state='normal')
             startKeyBinding_button.config(text=f"{StartHotkey.capitalize()}", state='normal')
             deleteTargetKeyBinding_button.config(text=f"{deleteTargetHotkey.capitalize()}", state='normal')
+            isKeyBindingActive=False
             return
 
         new_key = event.char if event.char else event.keysym
@@ -203,6 +209,7 @@ def capture_key(event, target):
             addTargetKeyBinding_button.config(text=f"{addTargetHotkey.capitalize()}", state='normal')
             startKeyBinding_button.config(text=f"{StartHotkey.capitalize()}", state='normal')
             deleteTargetKeyBinding_button.config(text=f"{deleteTargetHotkey.capitalize()}", state='normal')
+            isKeyBindingActive=False
             return
         
         new_key = event.char if event.char else event.keysym
@@ -214,6 +221,7 @@ def capture_key(event, target):
         startKeyBinding_button.config(text=f"{StartHotkey.capitalize()}", state='normal')
         deleteTargetKeyBinding_button.config(text=f"{deleteTargetHotkey.capitalize()}", state='normal')
 
+    isKeyBindingActive=False
     save_settings()
 
 # -------------------------
@@ -544,7 +552,8 @@ def Clicker():
 #IF THE START/STOP HOTKEY IS PRESSED CHANGE TO CLICKER IS ACTIVE
 def on_click(key):
     global IsClickerActive, showCursor
-    if (hasattr(key,'char') and key.char is not None and key.char==StartHotkey) or (getattr(key,'name','') and key.name.lower()==StartHotkey): IsClickerActive = not IsClickerActive
+    if (hasattr(key,'char') and key.char is not None and key.char==StartHotkey and not isKeyBindingActive) or (
+        getattr(key,'name','') and key.name.lower()==StartHotkey and not isKeyBindingActive): IsClickerActive = not IsClickerActive
 
 # -EVERYTHING FOR CATCHING PRESS OF ADD TARGET HOTKEY
 def on_addTarget_click(key):
